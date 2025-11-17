@@ -152,8 +152,7 @@ gateway-service/
 ├── src/main/java/org/sid/gatewayservice/
 │   ├── GatewayServiceApplication.java
 │   ├── config/
-│   │   ├── SecurityConfig.java       # OAuth2 + JWT
-│   │   ├── WebConfig.java            # CORS Configuration
+│   │   ├── SecurityConfig.java       # OAuth2 + JWT + CORS
 │   │   └── GlobalExceptionHandler.java
 │   ├── controller/
 │   │   └── AuthController.java       # Endpoint d'authentification
@@ -201,39 +200,39 @@ stock-service/
 #### Configuration du Realm Keycloak
 
 ![Keycloak Realm](screens/keyloak-realm.png)
-*Screenshot: Realm `stock-adria` configuration*
+*Capture d'écran : Configuration du realm `stock-adria`*
 
-#### Client Configuration
+#### Configuration du Client
 
-The client `stock-management-client` is configured with:
+Le client `stock-management-client` est configuré avec :
 - **Client Protocol:** OpenID Connect
 - **Access Type:** Confidential
-- **Direct Access Grants:** Enabled (for username/password authentication)
+- **Direct Access Grants:** Activé (pour l'authentification username/password)
 - **Valid Redirect URIs:** `http://localhost:3000/*`
 - **Web Origins:** `http://localhost:3000`
 
 
-#### User Management
+#### Gestion des Utilisateurs
 
-Created test users with appropriate roles:
+Utilisateurs de test créés avec les rôles appropriés :
 
-| Username | Password | Roles |
+| Nom d'utilisateur | Mot de passe | Rôles |
 |----------|----------|-------|
 | user1 | password123 | USER |
 | user2 | password123 | USER, ADMIN |
 
 ![Keycloak Users](screens/users.png)
-*Screenshot: Users*
+*Capture d'écran : Utilisateurs*
 
 ![Testing Roles](screens/userTest.png)
-*Screenshot: Front-End testing Ui with User*
+*Capture d'écran : Test de l'interface utilisateur avec les rôles*
 
 
-### 1.2 Authentication Flow Implementation
+### 2.2 Implémentation du Flux d'Authentification
 
-#### Gateway Service - Authentication Controller
+#### Gateway Service - Contrôleur d'Authentification
 
-The gateway service acts as an authentication proxy, handling login requests and communicating with Keycloak:
+Le service gateway agit comme un proxy d'authentification, gérant les requêtes de connexion et communiquant avec Keycloak :
 
 ```java
 @RestController
@@ -290,13 +289,13 @@ public class AuthController {
 }
 ```
 
-**Security Features:**
-- ✅ **Password never logged** - Prevents sensitive data exposure in logs
-- ✅ **Generic error messages** - Prevents information leakage about valid usernames
-- ✅ **Validated input** - Uses `@Valid` annotation for request validation
-- ✅ **Secure credential handling** - Client secret stored in configuration, not hardcoded
+**Fonctionnalités de Sécurité :**
+- ✅ **Mot de passe jamais journalisé** - Empêche l'exposition de données sensibles dans les logs
+- ✅ **Messages d'erreur génériques** - Empêche la fuite d'informations sur les noms d'utilisateur valides
+- ✅ **Entrées validées** - Utilise l'annotation `@Valid` pour la validation des requêtes
+- ✅ **Gestion sécurisée des identifiants** - Secret client stocké dans la configuration, non codé en dur
 
-#### Login Request DTO with Validation
+#### DTO de Requête de Connexion avec Validation
 
 ```java
 package org.sid.gatewayservice.dto;
@@ -317,12 +316,12 @@ public class LoginRequest {
 }
 ```
 
-**Security Features:**
-- ✅ **Input validation** - Prevents empty or malformed credentials
-- ✅ **Length constraints** - Prevents buffer overflow and ensures minimum security standards
-- ✅ **Custom error messages** - Provides clear feedback without exposing system details
+**Fonctionnalités de Sécurité :**
+- ✅ **Validation des entrées** - Empêche les identifiants vides ou mal formés
+- ✅ **Contraintes de longueur** - Empêche les débordements de tampon et garantit les normes minimales de sécurité
+- ✅ **Messages d'erreur personnalisés** - Fournit un retour clair sans exposer les détails du système
 
-### 1.3 Frontend Authentication Integration
+### 2.3 Intégration de l'Authentification Frontend
 
 ```javascript
 // Login.js - User login component
@@ -349,23 +348,23 @@ const handleLogin = async (e) => {
 };
 ```
 
-**Security Features:**
-- ✅ **Token stored in localStorage** - Persists authentication across page reloads
-- ✅ **Automatic redirect** - After successful login, redirects to protected resources
-- ✅ **Error handling** - Displays generic error messages to users
+**Fonctionnalités de Sécurité :**
+- ✅ **Token stocké dans localStorage** - Persiste l'authentification lors des rechargements de page
+- ✅ **Redirection automatique** - Après une connexion réussie, redirige vers les ressources protégées
+- ✅ **Gestion des erreurs** - Affiche des messages d'erreur génériques aux utilisateurs
 
-#### Login UI
+#### Interface de Connexion
 
 ![Login Page](screens/login-ui.png)
-*Screenshot: Login page with username/password authentication*
+*Capture d'écran : Page de connexion avec authentification username/password*
 
 ---
 
-## 2. Input Validation
+## 3. Validation des Entrées
 
-### 2.1 Stock Service - Request DTO Validation
+### 3.1 Stock Service - Validation du DTO de Requête
 
-All incoming data is validated using Jakarta Bean Validation annotations:
+Toutes les données entrantes sont validées à l'aide des annotations Jakarta Bean Validation :
 
 ```java
 package org.sid.stockservice.dtos;
@@ -418,13 +417,13 @@ public class StockMarketRequestDTO {
 }
 ```
 
-**Security Features:**
-- ✅ **Prevents SQL injection** - No raw strings accepted, all data validated
-- ✅ **Business logic validation** - Ensures data integrity (positive prices, valid dates)
-- ✅ **Range validation** - Prevents overflow attacks and invalid data
-- ✅ **Custom error messages** - Clear feedback for developers and users
+**Fonctionnalités de Sécurité :**
+- ✅ **Prévient l'injection SQL** - Aucune chaîne brute acceptée, toutes les données validées
+- ✅ **Validation de la logique métier** - Garantit l'intégrité des données (prix positifs, dates valides)
+- ✅ **Validation des plages** - Empêche les attaques par débordement et les données invalides
+- ✅ **Messages d'erreur personnalisés** - Retour clair pour les développeurs et les utilisateurs
 
-### 2.2 Controller-Level Validation
+### 3.2 Validation au Niveau du Contrôleur
 
 ```java
 @RestController
@@ -486,42 +485,42 @@ public class StockMarketController {
 }
 ```
 
-**Security Features:**
-- ✅ **@Validated annotation** - Enables method-level validation
-- ✅ **@Valid on request bodies** - Validates incoming JSON data
-- ✅ **Path variable validation** - Prevents negative or zero IDs
-- ✅ **Role-based access control** - `@PreAuthorize` restricts mutations to ADMIN users
-- ✅ **Structured logging** - Tracks all operations without exposing sensitive data
+**Fonctionnalités de Sécurité :**
+- ✅ **Annotation @Validated** - Active la validation au niveau de la méthode
+- ✅ **@Valid sur les corps de requête** - Valide les données JSON entrantes
+- ✅ **Validation des variables de chemin** - Empêche les ID négatifs ou nuls
+- ✅ **Contrôle d'accès basé sur les rôles** - `@PreAuthorize` restreint les mutations aux utilisateurs ADMIN
+- ✅ **Journalisation structurée** - Suit toutes les opérations sans exposer de données sensibles
 
-### 2.3 Frontend UI - Stock Management with Role-Based Access
+### 3.3 Interface Utilisateur Frontend - Gestion des Actions avec Contrôle d'Accès Basé sur les Rôles
 
-#### Stock List View (All Users)
+#### Vue de la Liste des Actions (Tous les Utilisateurs)
 
 ![Stock List](screens/stock-list.png)
-*Screenshot: Stock list page accessible to all authenticated users (USER and ADMIN roles)*
+*Capture d'écran : Page de liste des actions accessible à tous les utilisateurs authentifiés (rôles USER et ADMIN)*
 
-#### Adding Stock (ADMIN Only)
+#### Ajout d'Action (ADMIN Uniquement)
 
 ![Add Stock](screens/add-stock.png)
-*Screenshot: Add stock form - Only accessible to users with ADMIN role. Shows input validation in action.*
+*Capture d'écran : Formulaire d'ajout d'action - Accessible uniquement aux utilisateurs avec le rôle ADMIN. Montre la validation des entrées en action.*
 
-#### Deleting Stock (ADMIN Only)
+#### Suppression d'Action (ADMIN Uniquement)
 
 ![Delete Stock](screens/delete-stock.png)
-*Screenshot: Delete stock action - Restricted to ADMIN role. User1 (USER role) will receive 403 Forbidden error.*
+*Capture d'écran : Action de suppression d'action - Restreinte au rôle ADMIN. User1 (rôle USER) recevra une erreur 403 Forbidden.*
 
-**UI Security Features:**
-- ✅ **Role-based UI rendering** - Add/Delete buttons only shown to ADMIN users
-- ✅ **Client-side validation** - Form validation before API calls
-- ✅ **Error handling** - User-friendly error messages for validation failures and access denial
-- ✅ **Protected routes** - Unauthenticated users redirected to login page
-- ✅ **Token management** - Automatic token attachment to API requests via Axios interceptors
+**Fonctionnalités de Sécurité de l'Interface :**
+- ✅ **Rendu de l'interface basé sur les rôles** - Les boutons Ajouter/Supprimer ne sont affichés qu'aux utilisateurs ADMIN
+- ✅ **Validation côté client** - Validation du formulaire avant les appels API
+- ✅ **Gestion des erreurs** - Messages d'erreur conviviaux pour les échecs de validation et le refus d'accès
+- ✅ **Routes protégées** - Les utilisateurs non authentifiés sont redirigés vers la page de connexion
+- ✅ **Gestion des tokens** - Attachement automatique du token aux requêtes API via les intercepteurs Axios
 
 ---
 
-## 3. Global Exception Handling
+## 4. Gestion Globale des Exceptions
 
-### 3.1 Stock Service Exception Handler
+### 4.1 Gestionnaire d'Exceptions du Stock Service
 
 ```java
 
@@ -618,14 +617,14 @@ public class GlobalExceptionHandler {
 }
 ```
 
-**Security Features:**
-- ✅ **Consistent error responses** - Standard JSON format for all errors
-- ✅ **No stack trace exposure** - Internal errors don't leak system details
-- ✅ **Detailed validation errors** - Field-level feedback for bad requests
-- ✅ **Logging for monitoring** - All errors logged for security auditing
-- ✅ **HTTP status codes** - Proper status codes for different error types
+**Fonctionnalités de Sécurité :**
+- ✅ **Réponses d'erreur cohérentes** - Format JSON standard pour toutes les erreurs
+- ✅ **Pas d'exposition de la trace de pile** - Les erreurs internes ne divulguent pas les détails du système
+- ✅ **Erreurs de validation détaillées** - Retour au niveau du champ pour les mauvaises requêtes
+- ✅ **Journalisation pour la surveillance** - Toutes les erreurs journalisées pour l'audit de sécurité
+- ✅ **Codes de statut HTTP** - Codes de statut appropriés pour différents types d'erreurs
 
-### 3.2 Example Error Response
+### 4.2 Exemple de Réponse d'Erreur
 
 ```json
 {
@@ -643,11 +642,11 @@ public class GlobalExceptionHandler {
 
 ---
 
-## 4. Secure Logging
+## 5. Journalisation Sécurisée
 
-### 4.1 Logging Strategy
+### 5.1 Stratégie de Journalisation
 
-All controllers use SLF4J with specific logging levels:
+Tous les contrôleurs utilisent SLF4J avec des niveaux de journalisation spécifiques :
 
 ```java
 @Slf4j
@@ -673,14 +672,14 @@ public class AuthController {
 }
 ```
 
-**Security Practices:**
-- ✅ **Never log passwords** - Explicit comments remind developers
-- ✅ **Log levels** - INFO for important events, DEBUG for detailed traces, WARN for validation, ERROR for failures
-- ✅ **Minimal PII** - Only log necessary identifiers (IDs, usernames)
-- ✅ **Generic error messages** - External errors don't reveal system internals
-- ✅ **Audit trail** - All mutations (create, update, delete) are logged
+**Pratiques de Sécurité :**
+- ✅ **Ne jamais journaliser les mots de passe** - Des commentaires explicites rappellent aux développeurs
+- ✅ **Niveaux de log** - INFO pour les événements importants, DEBUG pour les traces détaillées, WARN pour la validation, ERROR pour les échecs
+- ✅ **PII minimales** - Ne journalise que les identifiants nécessaires (IDs, noms d'utilisateur)
+- ✅ **Messages d'erreur génériques** - Les erreurs externes ne révèlent pas les détails internes du système
+- ✅ **Piste d'audit** - Toutes les mutations (création, mise à jour, suppression) sont journalisées
 
-### 4.2 Logging Configuration
+### 5.2 Configuration de la Journalisation
 
 ```properties
 # application.properties
@@ -691,42 +690,73 @@ logging.level.org.springframework.security=DEBUG
 
 ---
 
-## 5. CORS Configuration
+## 6. Configuration CORS
 
-### 5.1 Gateway Service WebConfig
+### 6.1 SecurityConfig du Gateway Service
 
-CORS is centralized in the gateway service to prevent duplicate headers:
+CORS est configuré dans le SecurityConfig en utilisant un bean CorsConfigurationSource :
 
 ```java
 package org.sid.gatewayservice.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
-public class WebConfig implements WebMvcConfigurer {
+@EnableWebSecurity
+public class SecurityConfig {
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true)
-                .maxAge(3600);
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .cors(withDefaults())  // Enable CORS
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/actuator/**", "/api/auth/**").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> {})
+                );
+        
+        return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
 ```
 
-**Security Features:**
-- ✅ **Specific origin** - Only `http://localhost:3000` allowed (not `*`)
-- ✅ **Limited methods** - Only necessary HTTP methods permitted
-- ✅ **Credentials allowed** - Supports cookie/token-based auth
-- ✅ **Preflight caching** - 1-hour cache for OPTIONS requests
-- ✅ **Centralized configuration** - Single point of control
+**Fonctionnalités de Sécurité :**
+- ✅ **Origine spécifique** - Seul `http://localhost:3000` est autorisé (pas `*`)
+- ✅ **Méthodes limitées** - Seules les méthodes HTTP nécessaires sont autorisées
+- ✅ **Identifiants autorisés** - Prend en charge l'authentification basée sur les cookies/tokens
+- ✅ **Sessions sans état** - Pas de gestion de session côté serveur
+- ✅ **CSRF désactivé** - Tokens JWT utilisés à la place (sans état)
+- ✅ **Configuration centralisée** - CORS défini aux côtés des paramètres de sécurité
 
-### 5.2 Stock Service CORS Disabled
+### 6.2 CORS Désactivé dans le Stock Service
 
 ```java
 @Configuration
@@ -749,16 +779,16 @@ public class SecurityConfig {
 }
 ```
 
-**Security Rationale:**
-- ✅ **No duplicate headers** - Prevents "CORS header appeared twice" errors
-- ✅ **Gateway-only CORS** - Simplifies configuration and maintenance
-- ✅ **Defense in depth** - Stock service still requires valid JWT tokens
+**Justification de Sécurité :**
+- ✅ **Pas d'en-têtes dupliqués** - Empêche les erreurs "l'en-tête CORS est apparu deux fois"
+- ✅ **CORS uniquement sur le Gateway** - Simplifie la configuration et la maintenance
+- ✅ **Défense en profondeur** - Le service Stock nécessite toujours des tokens JWT valides
 
 ---
 
-## 6. OAuth2 Resource Server Configuration
+## 7. Configuration du Serveur de Ressources OAuth2
 
-### 6.1 Stock Service Security Configuration
+### 7.1 Configuration de Sécurité du Stock Service
 
 ```java
 package org.sid.stockservice.config;
@@ -805,14 +835,14 @@ public class SecurityConfig {
 }
 ```
 
-**Security Features:**
-- ✅ **JWT validation** - All tokens verified against Keycloak public key
-- ✅ **Role extraction** - Keycloak roles mapped to Spring Security authorities
-- ✅ **Method security** - `@PreAuthorize` annotations enforce role-based access
-- ✅ **Stateless authentication** - No server-side sessions, fully scalable
-- ✅ **Token expiration** - Keycloak manages token lifecycle
+**Fonctionnalités de Sécurité :**
+- ✅ **Validation JWT** - Tous les tokens vérifiés par rapport à la clé publique Keycloak
+- ✅ **Extraction des rôles** - Les rôles Keycloak mappés vers les autorités Spring Security
+- ✅ **Sécurité des méthodes** - Les annotations `@PreAuthorize` appliquent le contrôle d'accès basé sur les rôles
+- ✅ **Authentification sans état** - Pas de sessions côté serveur, entièrement évolutif
+- ✅ **Expiration des tokens** - Keycloak gère le cycle de vie des tokens
 
-### 6.2 Application Properties
+### 7.2 Propriétés de l'Application
 
 ```properties
 # Gateway Service
@@ -832,54 +862,54 @@ spring.security.oauth2.resourceserver.jwt.jwk-set-uri=http://localhost:8080/real
 
 ---
 
-## 7. Security Best Practices Applied
+## 8. Meilleures Pratiques de Sécurité Appliquées
 
-### 7.1 Defense in Depth
+### 8.1 Défense en Profondeur
 
-| Layer | Security Measure |
+| Couche | Mesure de Sécurité |
 |-------|------------------|
-| **Network** | CORS configured, specific origins only |
-| **Authentication** | Keycloak OAuth2/OpenID Connect, JWT tokens |
-| **Authorization** | Role-based access control (RBAC) with `@PreAuthorize` |
-| **Input Validation** | Jakarta Bean Validation, custom constraints |
-| **Error Handling** | Global exception handlers, no stack trace exposure |
-| **Logging** | Secure logging, no sensitive data in logs |
-| **Data Integrity** | Database constraints, JPA validation |
+| **Réseau** | CORS configuré, origines spécifiques uniquement |
+| **Authentification** | Keycloak OAuth2/OpenID Connect, tokens JWT |
+| **Autorisation** | Contrôle d'accès basé sur les rôles (RBAC) avec `@PreAuthorize` |
+| **Validation des Entrées** | Jakarta Bean Validation, contraintes personnalisées |
+| **Gestion des Erreurs** | Gestionnaires d'exceptions globaux, pas d'exposition de trace de pile |
+| **Journalisation** | Journalisation sécurisée, pas de données sensibles dans les logs |
+| **Intégrité des Données** | Contraintes de base de données, validation JPA |
 
-### 7.2 OWASP Top 10 Mitigation
+### 8.2 Atténuation OWASP Top 10
 
-| OWASP Risk | Mitigation Strategy |
+| Risque OWASP | Stratégie d'Atténuation |
 |------------|---------------------|
-| **A01: Broken Access Control** | JWT authentication, role-based authorization, `@PreAuthorize` |
-| **A02: Cryptographic Failures** | Passwords never logged, client secret in config (not code), HTTPS ready |
-| **A03: Injection** | Jakarta Bean Validation, JPA parameterized queries, input sanitization |
-| **A04: Insecure Design** | Fail-fast validation, least privilege, secure defaults |
-| **A05: Security Misconfiguration** | CORS properly configured, security headers, no default credentials |
-| **A07: Identification and Authentication Failures** | Keycloak integration, strong password policy, token expiration |
-| **A08: Software and Data Integrity Failures** | Input validation, data constraints, audit logging |
-| **A09: Security Logging and Monitoring Failures** | Structured logging, authentication events logged, error tracking |
-| **A10: Server-Side Request Forgery** | Input validation, no user-controlled URLs |
+| **A01: Broken Access Control** | Authentification JWT, autorisation basée sur les rôles, `@PreAuthorize` |
+| **A02: Cryptographic Failures** | Mots de passe jamais journalisés, secret client dans la config (pas dans le code), prêt pour HTTPS |
+| **A03: Injection** | Jakarta Bean Validation, requêtes JPA paramétrées, assainissement des entrées |
+| **A04: Insecure Design** | Validation fail-fast, privilège minimum, valeurs par défaut sécurisées |
+| **A05: Security Misconfiguration** | CORS correctement configuré, en-têtes de sécurité, pas d'identifiants par défaut |
+| **A07: Identification and Authentication Failures** | Intégration Keycloak, politique de mot de passe forte, expiration des tokens |
+| **A08: Software and Data Integrity Failures** | Validation des entrées, contraintes de données, journalisation d'audit |
+| **A09: Security Logging and Monitoring Failures** | Journalisation structurée, événements d'authentification journalisés, suivi des erreurs |
+| **A10: Server-Side Request Forgery** | Validation des entrées, pas d'URLs contrôlées par l'utilisateur |
 
-### 7.3 Key Security Features Summary
+### 8.3 Résumé des Principales Fonctionnalités de Sécurité
 
-✅ **Authentication**: Keycloak OAuth2 with OpenID Connect  
-✅ **Authorization**: Role-based access control (USER, ADMIN)  
-✅ **Token Management**: JWT with automatic validation and expiration  
-✅ **Input Validation**: Jakarta Bean Validation on all DTOs  
-✅ **Error Handling**: Global exception handlers with consistent responses  
-✅ **Secure Logging**: No passwords logged, minimal PII exposure  
-✅ **CORS**: Centralized configuration with specific origins  
-✅ **SQL Injection Prevention**: JPA with parameterized queries  
-✅ **Information Leakage Prevention**: Generic error messages to clients  
-✅ **Audit Trail**: All mutations logged with timestamps and user context  
+✅ **Authentification**: Keycloak OAuth2 avec OpenID Connect  
+✅ **Autorisation**: Contrôle d'accès basé sur les rôles (USER, ADMIN)  
+✅ **Gestion des Tokens**: JWT avec validation automatique et expiration  
+✅ **Validation des Entrées**: Jakarta Bean Validation sur tous les DTOs  
+✅ **Gestion des Erreurs**: Gestionnaires d'exceptions globaux avec réponses cohérentes  
+✅ **Journalisation Sécurisée**: Pas de mots de passe journalisés, exposition minimale des PII  
+✅ **CORS**: Configuration centralisée avec origines spécifiques  
+✅ **Prévention de l'Injection SQL**: JPA avec requêtes paramétrées  
+✅ **Prévention de Fuite d'Informations**: Messages d'erreur génériques pour les clients  
+✅ **Piste d'Audit**: Toutes les mutations journalisées avec horodatage et contexte utilisateur  
 
 ---
 
-## 8. Testing Security Features
+## 9. Tests des Fonctionnalités de Sécurité
 
-### 8.1 Authentication Tests
+### 9.1 Tests d'Authentification
 
-**Valid Login:**
+**Connexion Valide :**
 ```bash
 curl -X POST http://localhost:8888/api/auth/login \
   -H "Content-Type: application/json" \
@@ -889,7 +919,7 @@ curl -X POST http://localhost:8888/api/auth/login \
   }'
 ```
 
-**Response:**
+**Réponse :**
 ```json
 {
   "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -899,7 +929,7 @@ curl -X POST http://localhost:8888/api/auth/login \
 }
 ```
 
-**Invalid Login:**
+**Connexion Invalide :**
 ```bash
 curl -X POST http://localhost:8888/api/auth/login \
   -H "Content-Type: application/json" \
@@ -909,16 +939,16 @@ curl -X POST http://localhost:8888/api/auth/login \
   }'
 ```
 
-**Response:**
+**Réponse :**
 ```json
 {
   "error": "Authentication failed. Please check your credentials."
 }
 ```
 
-### 8.2 Validation Tests
+### 9.2 Tests de Validation
 
-**Invalid Stock Data:**
+**Données d'Action Invalides :**
 ```bash
 curl -X POST http://localhost:8888/api/stocks \
   -H "Authorization: Bearer <token>" \
@@ -934,7 +964,7 @@ curl -X POST http://localhost:8888/api/stocks \
   }'
 ```
 
-**Response:**
+**Réponse :**
 ```json
 {
   "timestamp": "2025-11-17T14:30:45.123",
@@ -951,9 +981,9 @@ curl -X POST http://localhost:8888/api/stocks \
 }
 ```
 
-### 8.3 Authorization Tests
+### 9.3 Tests d'Autorisation
 
-**USER role trying to create stock (should fail):**
+**Rôle USER essayant de créer une action (devrait échouer) :**
 ```bash
 curl -X POST http://localhost:8888/api/stocks \
   -H "Authorization: Bearer <user_token>" \
@@ -961,7 +991,7 @@ curl -X POST http://localhost:8888/api/stocks \
   -d '{...valid data...}'
 ```
 
-**Response:**
+**Réponse :**
 ```json
 {
   "timestamp": "2025-11-17T14:30:45.123",
@@ -974,57 +1004,57 @@ curl -X POST http://localhost:8888/api/stocks \
 
 ---
 
-## 9. Future Security Enhancements
+## 10. Améliorations de Sécurité Futures
 
-### Planned Improvements
+### Améliorations Prévues
 
-1. **Rate Limiting**
-   - Implement request throttling to prevent brute-force attacks
-   - Use Spring Cloud Gateway rate limiting filters
+1. **Limitation de Taux**
+   - Implémenter la limitation des requêtes pour prévenir les attaques par force brute
+   - Utiliser les filtres de limitation de taux Spring Cloud Gateway
 
-2. **HTTPS Configuration**
-   - Add SSL/TLS certificates for production
-   - Force HTTPS redirection
+2. **Configuration HTTPS**
+   - Ajouter des certificats SSL/TLS pour la production
+   - Forcer la redirection HTTPS
 
-3. **Password Policy**
-   - Enforce stronger password requirements in Keycloak
-   - Implement password complexity validation
+3. **Politique de Mot de Passe**
+   - Appliquer des exigences de mot de passe plus strictes dans Keycloak
+   - Implémenter la validation de la complexité des mots de passe
 
-4. **Security Headers**
-   - Add X-Content-Type-Options, X-Frame-Options, CSP headers
-   - Implement HSTS (HTTP Strict Transport Security)
+4. **En-têtes de Sécurité**
+   - Ajouter les en-têtes X-Content-Type-Options, X-Frame-Options, CSP
+   - Implémenter HSTS (HTTP Strict Transport Security)
 
-5. **Data Encryption at Rest**
-   - Encrypt sensitive database fields
-   - Use Spring Boot encryption utilities
+5. **Chiffrement des Données au Repos**
+   - Chiffrer les champs sensibles de la base de données
+   - Utiliser les utilitaires de chiffrement Spring Boot
 
-6. **Session Management**
-   - Implement refresh token rotation
-   - Add token revocation mechanism
+6. **Gestion des Sessions**
+   - Implémenter la rotation des refresh tokens
+   - Ajouter un mécanisme de révocation des tokens
 
-7. **Monitoring & Alerting**
-   - Integrate with security monitoring tools
-   - Set up alerts for suspicious activities
+7. **Surveillance & Alertes**
+   - Intégrer avec des outils de surveillance de sécurité
+   - Configurer des alertes pour les activités suspectes
 
 ---
 
 ## Conclusion
 
-This Stock Market Management System implements a comprehensive security strategy covering authentication, authorization, input validation, secure logging, and error handling. By integrating Keycloak for enterprise-grade authentication and following security best practices throughout the application, we've created a robust and secure system that protects against common vulnerabilities.
+Ce système de gestion du marché boursier implémente une stratégie de sécurité complète couvrant l'authentification, l'autorisation, la validation des entrées, la journalisation sécurisée et la gestion des erreurs. En intégrant Keycloak pour une authentification de niveau entreprise et en suivant les meilleures pratiques de sécurité tout au long de l'application, nous avons créé un système robuste et sécurisé qui protège contre les vulnérabilités courantes.
 
-**Key Achievements:**
-- ✅ Enterprise authentication with Keycloak OAuth2/OpenID Connect
-- ✅ Role-based access control with fine-grained permissions
-- ✅ Comprehensive input validation preventing injection attacks
-- ✅ Secure logging without exposing sensitive information
-- ✅ Global exception handling preventing information leakage
-- ✅ CORS configuration following best practices
-- ✅ OWASP Top 10 mitigation strategies applied
+**Réalisations Clés :**
+- ✅ Authentification d'entreprise avec Keycloak OAuth2/OpenID Connect
+- ✅ Contrôle d'accès basé sur les rôles avec permissions granulaires
+- ✅ Validation complète des entrées prévenant les attaques par injection
+- ✅ Journalisation sécurisée sans exposer d'informations sensibles
+- ✅ Gestion globale des exceptions empêchant la fuite d'informations
+- ✅ Configuration CORS suivant les meilleures pratiques
+- ✅ Stratégies d'atténuation OWASP Top 10 appliquées
 
-This security implementation demonstrates a strong understanding of modern application security principles and their practical application in a Spring Boot microservices architecture.
+Cette implémentation de sécurité démontre une forte compréhension des principes modernes de sécurité des applications et leur application pratique dans une architecture de microservices Spring Boot.
 
 ---
 
 **Naoufal Guendouz**  
-*Security-focused Backend Developer*  
-November 17, 2025
+*Développeur Backend axé sur la Sécurité*  
+17 Novembre 2025
