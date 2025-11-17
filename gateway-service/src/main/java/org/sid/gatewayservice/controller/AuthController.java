@@ -1,5 +1,6 @@
 package org.sid.gatewayservice.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.sid.gatewayservice.dto.LoginRequest;
 import org.sid.gatewayservice.dto.TokenResponse;
@@ -7,11 +8,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("/api/auth")
+@Validated
 @Slf4j
 public class AuthController {
 
@@ -33,6 +36,7 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
             log.info("Attempting login for user: {}", loginRequest.getUsername());
+            // DO NOT log the password for security reasons
             log.debug("Keycloak URL: {}/realms/{}/protocol/openid-connect/token", keycloakServerUrl, realm);
             
             String tokenUrl = String.format("%s/realms/%s/protocol/openid-connect/token",
@@ -50,14 +54,14 @@ public class AuthController {
             // Add client secret if provided (for confidential clients)
             if (clientSecret != null && !clientSecret.isEmpty()) {
                 map.add("client_secret", clientSecret);
-                log.debug("Using client secret for authentication");
+                log.debug("Using confidential client authentication");
             } else {
                 log.debug("Using public client (no client secret)");
             }
 
             HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
 
-            log.debug("Sending request to Keycloak...");
+            log.debug("Sending authentication request to Keycloak...");
             ResponseEntity<TokenResponse> response = restTemplate.postForEntity(
                     tokenUrl,
                     request,
@@ -69,8 +73,9 @@ public class AuthController {
 
         } catch (Exception e) {
             log.error("Login failed for user: {}. Error: {}", loginRequest.getUsername(), e.getMessage());
+            // Don't expose internal error details to the client
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse("Invalid username or password. Please check your credentials and ensure Keycloak is configured correctly."));
+                    .body(new ErrorResponse("Invalid username or password. Please check your credentials."));
         }
     }
 
