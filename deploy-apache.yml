@@ -1,0 +1,45 @@
+---
+- hosts: all
+  tasks:
+    - name: Install Apache
+      ansible.builtin.dnf:
+        name: httpd
+        state: present
+    - name: Start Apache
+      ansible.builtin.service:
+        name: httpd
+        state: started
+
+
+    - name: Create Project Directory if don't exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - /var/www/html/TRANSACTION/frontend
+        - /var/www/html/TRANSACTION/services
+
+    - name: Copying Front End files into Apache Directories
+      ansible.builtin.copy:
+        src: ./frontend/build/
+        dest: /var/www/html/TRANSACTION/frontend
+    
+    - name: Copying & Extracting backEnd files
+      ansible.builtin.unarchive:
+        src: "{{ item }}"
+        dest: /var/www/html/TRANSACTION/services
+      loop:
+        - ./client-service/target/*.jar
+        - ./config-microservice/target/*.jar
+        - ./discovery-service/target/*.jar
+        - ./gateway-service/target/*.jar
+        - ./transaction-service/target/*.jar
+
+        
+      
+      
+
+    
+         
+
+    
