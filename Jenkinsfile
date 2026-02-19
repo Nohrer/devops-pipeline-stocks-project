@@ -11,6 +11,7 @@ pipeline{
                 sh 'echo "Building  backend services"'
                 sh 'mvn clean package -DskipTests'
                 sh 'echo "Building frontend"'
+                sh 'tree'
                   dir('frontend'){
                     sh 'npm install'
                     sh 'npm run build'

@@ -1,12 +1,12 @@
 services:
 
-  client-db:
+  stock-db:
     image: postgres:15-alpine
-    container_name: client-db
+    container_name: stock-db
     environment:
-      POSTGRES_DB: client-db
-      POSTGRES_USER: client_user
-      POSTGRES_PASSWORD: ${DB_CLIENT_PASSWORD}
+      POSTGRES_DB: stock-db
+      POSTGRES_USER: stock_user
+      POSTGRES_PASSWORD: stock_password
     volumes:
       - client-data:/var/lib/postgresql/data
     networks:
@@ -17,26 +17,14 @@ services:
       timeout: 5s
       retries: 5
 
-  transaction-db:
-    image: postgres:15-alpine
-    container_name: transaction-db
-    environment:
-      POSTGRES_DB: transaction-db
-      POSTGRES_USER: transaction_user
-      POSTGRES_PASSWORD: ${DB_TRANSACTION_PASSWORD}
-    volumes:
-      - transaction-data:/var/lib/postgresql/dqtq
-    networks:
-      - backend-network
 
-  client-service:
+  stock-service:
     build:
-      context: ./client-service
+      context: ./stock-service
       dockerfile: Dockerfile
       network: host
-    container_name: client-service
+    container_name: stock-service
     environment:
-      POSTGRES_DB
 
     ports:
       - 8081:8081
