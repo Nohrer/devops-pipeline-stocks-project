@@ -11,11 +11,17 @@ pipeline{
                 sh 'echo "Building  backend services"'
                 sh 'mvn clean package -DskipTests'
                 sh 'echo "Building frontend"'
-                sh 'tree'
                   dir('frontend'){
                     sh 'npm install'
                     sh 'npm run build'
                     }
+            }
+        }
+        stage('deploy'){
+            steps{
+                withCredentials([file(credentialsId: 'ansible_vault_password', variable: 'VAULT_PASS_FILE')]){
+                    sh 'ansible-playbook -i hosts deploy-apache.yml --vault-password-file=$VAULT_PASS_FILE'
+                }     
             }
         }
 

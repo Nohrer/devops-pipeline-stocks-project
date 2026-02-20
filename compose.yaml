@@ -24,7 +24,7 @@ services:
       dockerfile: Dockerfile
       network: host
     container_name: stock-service
-    environment:
+   # environment:
 
     ports:
       - 8081:8081

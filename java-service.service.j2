@@ -1,0 +1,15 @@
+[Unit]
+Description={{ item.path | basename }}
+After=network.target
+
+[Service]
+User=appuser
+WorkingDirectory=/opt/STOCK
+ExecStart=/usr/bin/java -jar {{ item.path }}
+SuccessExitStatus=143
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+

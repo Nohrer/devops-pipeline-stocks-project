@@ -1,45 +1,103 @@
 ---
-- hosts: all
+- name: Deploy services into local services
+  hosts: localhost
+  become: yes
+  become_user: root
+  gather_facts: false
+  vars:
+    app_user: appuser
+    app_dir: /opt/STOCK
   tasks:
-    - name: Install Apache
+
+    # ENSURE APACHE IS RUNNING
+    - name: Ensure Apache is Installed
       ansible.builtin.dnf:
         name: httpd
         state: present
+
     - name: Start Apache
       ansible.builtin.service:
         name: httpd
         state: started
 
-
+    # APPLICATION COPY INTO DIRECTORY
     - name: Create Project Directory if don't exist
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
       loop:
-        - /var/www/html/TRANSACTION/frontend
-        - /var/www/html/TRANSACTION/services
+        - /var/www/html/STOCK/frontend
+        - /opt/STOCK/
 
     - name: Copying Front End files into Apache Directories
       ansible.builtin.copy:
         src: ./frontend/build/
-        dest: /var/www/html/TRANSACTION/frontend
-    
-    - name: Copying & Extracting backEnd files
-      ansible.builtin.unarchive:
+        dest: /var/www/html/STOCK/frontend/
+
+    - name: Copying backEnd files
+      ansible.builtin.copy:
         src: "{{ item }}"
-        dest: /var/www/html/TRANSACTION/services
+        dest: "{{ app_dir }}"
       loop:
-        - ./client-service/target/*.jar
-        - ./config-microservice/target/*.jar
-        - ./discovery-service/target/*.jar
-        - ./gateway-service/target/*.jar
-        - ./transaction-service/target/*.jar
+        - stock-service/target/stock-service-0.0.1-SNAPSHOT.jar
+        - discovery-service/target/discovery-service-0.0.1-SNAPSHOT.jar
+        - gateway-service/target/gateway-service-0.0.1-SNAPSHOT.jar
 
-        
+
+    # USER & DIR OWNERSHIP
+    - name: Create App User If doesn't exist
+      ansible.builtin.user:
+        name: "{{ app_user }}"
+        shell: /sbin/nologin
+        create_home: no
+        state: present
+
+    - name: Ensure Application Ownership
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        recurse: yes
+
       
-      
+    # CREATING SYS SERVICES FOR EACH SERVICE
+    - name: Find Jars
+      ansible.builtin.find:
+        paths: "{{ app_dir }}"
+        patterns: "*.jar"
+      register: jar_files
 
-    
-         
+    - name: Create SystemD Services
+      ansible.builtin.template:
+        src: java-service.service.j2
+        dest: "/etc/systemd/system/{{ item.path | basename | regex_replace('-0.0.1-SNAPSHOT.jar','')}}.service"
+        mode: '0644'
+      loop: "{{ jar_files.files }}"
+      notify: Reload System
 
-    
+    - name: Ensure Apache Configuration Exist
+      ansible.builtin.copy:
+        src: stockFront.conf
+        dest: "/etc/httpd/conf.d"
+      notify: restart apache2
+
+    - name: Ensure Backend Services running
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: started
+        daemon_reload: yes
+      loop:
+        - stock-service
+        - gateway-service
+        - discovery-service
+
+
+  handlers:
+    - name: Reload System
+      ansible.builtin.systemd:
+        daemon_reload: yes
+    - name: restart apache2
+      ansible.builtin.systemd:
+        name: httpd
+        state: restarted
+        daemon_reload: yes
