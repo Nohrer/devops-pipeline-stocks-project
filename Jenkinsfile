@@ -63,7 +63,7 @@ pipeline{
                         sh """
                         echo "Uploading stock-service with version: ${APP_VERSION}"
                         curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file stock-service/target/stock-service-${APP_VERSION}.jar \
-                        http://localhost:5050/repository/releases/org/sid/stock-service/${APP_VERSION}/stock-service-${APP_VERSION}.jar
+                        http://localhost:5050/repository/stockApp/
                         
                         echo "Uploading gateway-service"
                         curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file gateway-service/target/gateway-service-${APP_VERSION}.jar \
@@ -85,5 +85,13 @@ pipeline{
         //     }
         // }
 
+    }
+    post {
+        always {
+            cleanWs()
+        }
+        failure {
+            echo 'Pipeline failed. Please check SonarQube report.'
+        }
     }
 }
