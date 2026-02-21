@@ -6,24 +6,62 @@ pipeline{
                 checkout scm
             }
         }
+        stage('Generate Version'){
+            steps{
+                script{
+                    def dateVersion = sh(
+                        script: "date +%y%j",
+                        returnStdout: true
+                    ).trim()
+                    env.APP_VERSION = "STOCKS-1.0.${dateVersion}.${env.BUILD_NUMBER}"
+                }
+            }
+        }
         stage('build'){
             steps{
-                sh 'echo "Building  backend services"'
-                sh 'mvn clean package -DskipTests'
-                sh 'echo "Building frontend"'
-                  dir('frontend'){
-                    sh 'npm install'
-                    sh 'npm run build'
+                script{
+                    def stockServiceChanged = sh(script: 'git diff --name-only HEAD-1 | grep -q "stock-service/"',returnStatus: true) == 0
+                    def gatewayServiceChanged = sh(script: 'git diff --name-only HEAD-1 | grep -q "gateway-service/"',returnStatus: true) == 0
+                    def discoveryServiceChanged = sh(script: 'git diff --name-only HEAD-1 | grep -q "discovery-service/"',returnStatus: true) == 0
+                    def frontendChanged = sh(script: 'git diff --name-only HEAD-1 | grep -q "frontend/"',returnStatus: true) == 0
+
+
+                    sh 'echo "Building  backend services"'
+                    if(stockServiceChanged || gatewayServiceChanged || discoveryServiceChanged ){
+                        sh 'mvn clean package -DskipTests'
                     }
+
+                    if(frontendChanged){
+                        dir('frontend'){
+                            sh 'echo "Building frontend"'
+                            sh 'npm install'
+                            sh 'npm run build'
+                            sh 'tar -czf frontend-${env.APP_VERSION}.tar.gz build/'
+                            sh ' mv frontend-${env.APP_VERSION}.tar.gz ../frontend-${env.APP_VERSION}.tar.gz'
+                        }
+                    }
+                }                      
             }
         }
-        stage('deploy'){
+        stage('deploy to nexus'){
             steps{
-                withCredentials([file(credentialsId: 'ansible_vault_password', variable: 'VAULT_PASS_FILE')]){
-                    sh 'ansible-playbook -i hosts deploy-apache.yml --vault-password-file=$VAULT_PASS_FILE'
-                }     
+                script{
+                    withCredentials({usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')}){
+                        sh '''
+                          curl -v -u $NEXUS_USER:$NEXUS_PASS --upload-file stock-service/target/stock-service-0.0.1-SNAPSHOT.jar \
+                           http://localhost:5050/repository/releases/org/sid/stock-service/${APP_VERSION}/stock-service-${APP_VERSION}.jar
+                        '''
+                    }
+                }
             }
         }
+        // stage('deploy'){
+        //     steps{
+        //         withCredentials([file(credentialsId: 'ansible_vault_password', variable: 'VAULT_PASS_FILE')]){
+        //             sh 'ansible-playbook -i hosts deploy-apache.yml --vault-password-file=$VAULT_PASS_FILE'
+        //         }     
+        //     }
+        // }
 
     }
 }
