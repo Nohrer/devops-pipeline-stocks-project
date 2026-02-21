@@ -75,7 +75,7 @@ pipeline{
                         
                         echo "Uploading frontend"
                         curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file frontend-${APP_VERSION}.tar.gz \
-                        http://localhost:5050/repository/stockApp-releases/org/sid/frontend/frontend-${APP_VERSION}.tar.gz
+                        http://localhost:5050/repository/stockApp-releases/org/sid/frontend/${APP_VERSION}/frontend-${APP_VERSION}.tar.gz
                         """
                     }
                 }
