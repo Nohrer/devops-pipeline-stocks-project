@@ -27,7 +27,6 @@ pipeline{
 
 
                     sh 'echo "Building  backend services"'
-                    if(stockServiceChanged || gatewayServiceChanged || discoveryServiceChanged ){
                         sh 'mvn versions:set -DnewVersion=${APP_VERSION} -DprocessAllModules'
                         sh 'mvn clean package -DskipTests'
                         sh '''
@@ -35,7 +34,6 @@ pipeline{
                         [ -f gateway-service/target/gateway-service-${APP_VERSION}.jar ] || mv gateway-service/target/gateway-service-*.jar gateway-service/target/gateway-service-${APP_VERSION}.jar
                         [ -f discovery-service/target/discovery-service-${APP_VERSION}.jar ] || mv discovery-service/target/discovery-service-*.jar discovery-service/target/discovery-service-${APP_VERSION}.jar
                         '''
-                    }
 
                     // if(frontendChanged){
                         dir('frontend'){
