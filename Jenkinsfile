@@ -60,9 +60,19 @@ pipeline{
               ls -la discovery-service/target/ | grep -i jar || echo "No JAR files found"
             '''
                     withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
-                        sh '''
-                          curl -v -u $NEXUS_USER:$NEXUS_PASSWORD --upload-file stock-service/target/stock-service-${APP_VERSION}.jar \
-http://localhost:5050/repository/maven-snapshots/                        '''
+                        sh """
+                        echo "Uploading stock-service with version: ${APP_VERSION}"
+                        curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file stock-service/target/stock-service-${APP_VERSION}.jar \
+                        http://localhost:5050/repository/releases/org/sid/stock-service/${APP_VERSION}/stock-service-${APP_VERSION}.jar
+                        
+                        echo "Uploading gateway-service"
+                        curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file gateway-service/target/gateway-service-${APP_VERSION}.jar \
+                        http://localhost:5050/repository/releases/org/sid/gateway-service/${APP_VERSION}/gateway-service-${APP_VERSION}.jar
+                        
+                        echo "Uploading discovery-service"
+                        curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file discovery-service/target/discovery-service-${APP_VERSION}.jar \
+                        http://localhost:5050/repository/releases/org/sid/discovery-service/${APP_VERSION}/discovery-service-${APP_VERSION}.jar
+                        """
                     }
                 }
             }
