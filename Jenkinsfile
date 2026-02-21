@@ -28,6 +28,7 @@ pipeline{
 
                     sh 'echo "Building  backend services"'
                     if(stockServiceChanged || gatewayServiceChanged || discoveryServiceChanged ){
+                        sh 'mvn versions:set -DnewVersion=${APP_VERSION} -DprocessAllModules'
                         sh 'mvn clean package -DskipTests'
                     }
 
@@ -49,7 +50,7 @@ pipeline{
                     withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
                         sh '''
                           curl -v -u $NEXUS_USER:$NEXUS_PASS --upload-file stock-service/target/stock-service-0.0.1-SNAPSHOT.jar \
-                          http://localhost:5050/repository/maven-releases/stock-service/${APP_VERSION}/stock-service-${APP_VERSION}.jar
+                          http://localhost:5050/repository/maven-snapshots/
                         '''
                     }
                 }
