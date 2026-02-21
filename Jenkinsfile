@@ -49,8 +49,8 @@ pipeline{
                 script{
                     withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
                         sh '''
-                          curl -v -u $NEXUS_USER:$NEXUS_PASS --upload-file stock-service/target/stock-service-0.0.1-SNAPSHOT.jar \
-                          http://localhost:5050/repository/maven-snapshots/
+                          curl -v -u $NEXUS_USER:$NEXUS_PASSWORD --upload-file stock-service/target/stock-service-${APP_VERSION}.jar \
+                          http://localhost:5050/repository/releases/org/sid/stock-service/${APP_VERSION}/stock-service-${APP_VERSION}.jar
                         '''
                     }
                 }
