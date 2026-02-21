@@ -61,22 +61,22 @@ pipeline{
             '''
                     withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
                         sh """
-                            echo "Uploading stock-service with version: ${APP_VERSION}"
-                            curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file stock-service/target/stock-service-${APP_VERSION}.jar \
-                            http://localhost:5050/repository/stockApp-releases/stock-service-${APP_VERSION}.jar
-                            
-                            echo "Uploading gateway-service"
-                            curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file gateway-service/target/gateway-service-${APP_VERSION}.jar \
-                            http://localhost:5050/repository/stockApp-releases/gateway-service-${APP_VERSION}.jar
-                            
-                            echo "Uploading discovery-service"
-                            curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file discovery-service/target/discovery-service-${APP_VERSION}.jar \
-                            http://localhost:5050/repository/stockApp-releases/discovery-service-${APP_VERSION}.jar
-                            
-                            echo "Uploading frontend"
-                            curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file frontend-${APP_VERSION}.tar.gz \
-                            http://localhost:5050/repository/stockApp-releases/frontend-${APP_VERSION}.tar.gz
-                            """
+                        echo "Uploading stock-service with version: ${APP_VERSION}"
+                        curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file stock-service/target/stock-service-${APP_VERSION}.jar \
+                        http://localhost:5050/repository/stockApp-releases/org/sid/stock-service/${APP_VERSION}/stock-service-${APP_VERSION}.jar
+                        
+                        echo "Uploading gateway-service"
+                        curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file gateway-service/target/gateway-service-${APP_VERSION}.jar \
+                        http://localhost:5050/repository/stockApp-releases/org/sid/gateway-service/${APP_VERSION}/gateway-service-${APP_VERSION}.jar
+                        
+                        echo "Uploading discovery-service"
+                        curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file discovery-service/target/discovery-service-${APP_VERSION}.jar \
+                        http://localhost:5050/repository/stockApp-releases/org/sid/discovery-service/${APP_VERSION}/discovery-service-${APP_VERSION}.jar
+                        
+                        echo "Uploading frontend"
+                        curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file frontend-${APP_VERSION}.tar.gz \
+                        http://localhost:5050/repository/stockApp-releases/org/sid/frontend/${APP_VERSION}/frontend-${APP_VERSION}.tar.gz
+                        """
                     }
                 }
             }
