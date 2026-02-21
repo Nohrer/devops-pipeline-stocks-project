@@ -52,10 +52,19 @@ pipeline{
         stage('deploy to nexus'){
             steps{
                 script{
+                    sh '''
+              echo "Current directory: $(pwd)"
+              echo "Listing stock-service target:"
+              ls -la stock-service/target/ | grep -i jar || echo "No JAR files found"
+              echo "Listing gateway-service target:"
+              ls -la gateway-service/target/ | grep -i jar || echo "No JAR files found"
+              echo "Listing discovery-service target:"
+              ls -la discovery-service/target/ | grep -i jar || echo "No JAR files found"
+            '''
                     withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
                         sh '''
                           curl -v -u $NEXUS_USER:$NEXUS_PASSWORD --upload-file stock-service/target/stock-service-${APP_VERSION}.jar \
-                          http://localhost:5050/repository/maven-snapshots/
+                          http://localhost:5050/repository/releases/org/sid/stock-service/${APP_VERSION}/stock-service-${APP_VERSION}.jar
                         '''
                     }
                 }
