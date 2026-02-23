@@ -34,16 +34,24 @@
 
     - name: Download Front End files into Apache Directories From Nexus
       ansible.builtin.get_url:
-        url: "{{ nexus_url }}/frontend/latest"
+        url: "{{ nexus_url }}/frontend/latest/frontend-latest.tar.gz"
+        dest: "/tmp/STOCK"
+
+    - name: Unarchive the zip
+      ansible.builtin.unarchive:
+        src: "/tmp/STOCK/frontend-latest.tar.gz"
+        dest: "/var/www/html/STOCK/frontend"
+        remote_src: yes
+        
 
     - name: Copying backEnd files
-      ansible.builtin.copy:
-        src: "{{ item }}"
+      ansible.builtin.get_url:
+        url: "{{ nexus_url }}/{{ item }}/latest/{{ item }}-latest.jar"
         dest: "{{ app_dir }}"
       loop:
-        - stock-service/target/stock-service-0.0.1-SNAPSHOT.jar
-        - discovery-service/target/discovery-service-0.0.1-SNAPSHOT.jar
-        - gateway-service/target/gateway-service-0.0.1-SNAPSHOT.jar
+        - stock-service
+        - discovery-service
+        - gateway-service
 
 
     # USER & DIR OWNERSHIP
