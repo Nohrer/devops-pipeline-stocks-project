@@ -1,23 +1,15 @@
 pipeline{
     agent any
+    tools{
+        maven 'Maven'
+    }
     stages{
         stage('checkout'){
             steps{
                 checkout scm
             }
         }
-        stage('SonarQube Analysis') {
-            steps{
-                script{
-                     def mvn = tool 'sonnarScanner';
-                    withSonarQubeEnv() {
-                    sh "${mvn}/bin/mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=stock-services -Dsonar.projectName='stock-services'"
-                    }
-                }
-            }
-           
-        }
-        // test 2
+
         stage('Generate Version'){
             steps{
                 script{
@@ -58,6 +50,14 @@ pipeline{
                     // }
                 }                      
             }
+        }
+        stage('SonarQube Analysis') {
+            steps{
+                withSonarQubeEnv('sonar-server'){
+                    sh 'mvn sonar:sonar'
+                }
+            }
+           
         }
         // stage('deploy to nexus'){
         //     steps{
