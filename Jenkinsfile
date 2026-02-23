@@ -49,13 +49,33 @@ pipeline{
                 }                      
             }
         }
-        stage('SonarQube Analysis') {
+        stage("Sonnar Scan & Dependency Check"){
             steps{
-                withSonarQubeEnv('sonar-server'){
-                    sh 'mvn sonar:sonar'
+                script {
+                    def services = ['discovery-service', 'gateway-service', 'stock-service']
+                    
+                    services.each { service ->
+                        echo "Scanning ${service} with SonarQube..."
+                        
+                        dir(service) {
+                            withSonarQubeEnv('sonar-server') {
+                                sh """
+                                mvn clean verify \
+                                org.owasp:dependency-check-maven:check \
+                                sonar:sonar \
+                                -Dsonar.projectKey=${service} \
+                                -Dsonar.dependencyCheck.jsonReportPath=target/dependency-check-report.json \
+                                -Dsonar.dependencyCheck.htmlReportPath=target/dependency-check-report.html
+                                """
+                            }
+                            
+                            // Publish to Jenkins dashboard
+                            dependencyCheckPublisher pattern: 'target/dependency-check-report.xml'
+                        }
+                        echo "Completed SonarQube scan for ${service}."
+                    }
                 }
             }
-           
         }
         // stage('deploy to nexus'){
         //     steps{
