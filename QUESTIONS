@@ -1,3 +1,5 @@
 - la maniere de faire pour utiliser sonar
     - pour le moment on utilise pluing + token user de nexus
-    - 
+- les builds deja existant pour ne pas refaire chaque etape si on la deja bien fait
+    - cache?
+- structure des artifactes sur nexus

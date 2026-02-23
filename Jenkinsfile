@@ -95,21 +95,34 @@ pipeline{
                         echo "Uploading frontend"
                         curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file frontend-${APP_VERSION}.tar.gz \
                         http://localhost:5050/repository/stockApp-releases/org/sid/frontend/${APP_VERSION}/frontend-${APP_VERSION}.tar.gz
+                        
+                        echo "Uploading Latest"
+                        curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file gateway-service/target/gateway-service-${APP_VERSION}.jar \
+                        http://localhost:5050/repository/stockApp-releases/org/sid/gateway-service/latest/gateway-service-latest.jar
+
+                        curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file discovery-service/target/discovery-service-${APP_VERSION}.jar \
+                        http://localhost:5050/repository/stockApp-releases/org/sid/discovery-service/latest/discovery-service-latest.jar
+
+                        curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file stock-service/target/stock-service-${APP_VERSION}.jar \
+                        http://localhost:5050/repository/stockApp-releases/org/sid/stock-service/latest/stock-service-latest.jar
+
+                        curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file frontend-${APP_VERSION}.tar.gz \
+                        http://localhost:5050/repository/stockApp-releases/org/sid/frontend/latest/frontend-latest.tar.gz
                         """
                     }
                 }
             }
         }
 
-        stage('deploy'){
-            steps{
-                withCredentials([file(credentialsId: 'ANSIBLE_VAULT_PASS', variable: 'VAULT_PASS_FILE')]){
-                    sh 'pwd'
-                    sh 'ls'
-                    sh 'ansible-playbook -i inventory.ini deploy-apache.yml --vault-password-file=$VAULT_PASS_FILE'
-                }     
-            }
-        }
+        // stage('deploy'){
+        //     steps{
+        //         withCredentials([file(credentialsId: 'ANSIBLE_VAULT_PASS', variable: 'VAULT_PASS_FILE')]){
+        //             sh 'pwd'
+        //             sh 'ls'
+        //             sh 'ansible-playbook -i inventory.ini deploy-apache.yml --vault-password-file=$VAULT_PASS_FILE'
+        //         }     
+        //     }
+        // }
 
     }
     post {

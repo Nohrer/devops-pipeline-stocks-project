@@ -9,6 +9,7 @@
   vars:
     app_user: appuser
     app_dir: /opt/STOCK
+    nexus_url: http://localhost:5050/repository/stockApp-releases/org/sid
   tasks:
 
     # ENSURE APACHE IS RUNNING
@@ -31,10 +32,9 @@
         - /var/www/html/STOCK/frontend
         - /opt/STOCK/
 
-    - name: Copying Front End files into Apache Directories
-      ansible.builtin.copy:
-        src: ./frontend/build/
-        dest: /var/www/html/STOCK/frontend/
+    - name: Download Front End files into Apache Directories From Nexus
+      ansible.builtin.get_url:
+        url: "{{ nexus_url }}/frontend/latest"
 
     - name: Copying backEnd files
       ansible.builtin.copy:
