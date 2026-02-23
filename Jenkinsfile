@@ -74,7 +74,7 @@ pipeline{
                 }
             }
         }
-        
+
         stage('deploy to nexus'){
             steps{
                 script{
@@ -100,13 +100,14 @@ pipeline{
                 }
             }
         }
-        // stage('deploy'){
-        //     steps{
-        //         withCredentials([file(credentialsId: 'ansible_vault_password', variable: 'VAULT_PASS_FILE')]){
-        //             sh 'ansible-playbook -i hosts deploy-apache.yml --vault-password-file=$VAULT_PASS_FILE'
-        //         }     
-        //     }
-        // }
+        
+        stage('deploy'){
+            steps{
+                withCredentials([file(credentialsId: 'ansible_vault_password', variable: 'VAULT_PASS_FILE')]){
+                    sh 'ansible-playbook -i hosts deploy-apache.yml --vault-password-file=$VAULT_PASS_FILE'
+                }     
+            }
+        }
 
     }
     post {
