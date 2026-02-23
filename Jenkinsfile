@@ -100,10 +100,10 @@ pipeline{
                 }
             }
         }
-        
+
         stage('deploy'){
             steps{
-                withCredentials([file(credentialsId: 'ansible_vault_password', variable: 'VAULT_PASS_FILE')]){
+                withCredentials([file(credentialsId: 'ANSIBLE_VAULT_PASS', variable: 'VAULT_PASS_FILE')]){
                     sh 'ansible-playbook -i hosts deploy-apache.yml --vault-password-file=$VAULT_PASS_FILE'
                 }     
             }
