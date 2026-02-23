@@ -68,7 +68,6 @@ pipeline{
                             }
                             
                             // Publish to Jenkins dashboard
-                            dependencyCheckPublisher pattern: 'target/dependency-check-report.xml'
                         }
                         echo "Completed SonarQube scan for ${service}."
                     }
