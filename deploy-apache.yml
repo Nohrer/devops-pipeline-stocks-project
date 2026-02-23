@@ -36,6 +36,9 @@
       ansible.builtin.get_url:
         url: "{{ nexus_url }}/frontend/latest/frontend-latest.tar.gz"
         dest: "/tmp/STOCK"
+        url_username: "{{ nexus_user }}"
+        url_password: "{{ nexus_password }}"
+        force_basic_auth: yes
 
     - name: Unarchive the zip
       ansible.builtin.unarchive:
@@ -48,6 +51,9 @@
       ansible.builtin.get_url:
         url: "{{ nexus_url }}/{{ item }}/latest/{{ item }}-latest.jar"
         dest: "{{ app_dir }}"
+        url_username: "{{ nexus_user }}"
+        url_password: "{{ nexus_password }}"
+        force_basic_auth: yes
       loop:
         - stock-service
         - discovery-service
