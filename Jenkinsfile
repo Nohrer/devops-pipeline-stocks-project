@@ -6,6 +6,12 @@ pipeline{
                 checkout scm
             }
         }
+        stage('SonarQube Analysis') {
+            def mvn = tool 'Default Maven';
+            withSonarQubeEnv() {
+            sh "${mvn}/bin/mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=stock-services -Dsonar.projectName='stock-services'"
+            }
+        }
         stage('Generate Version'){
             steps{
                 script{
@@ -47,40 +53,31 @@ pipeline{
                 }                      
             }
         }
-        stage('deploy to nexus'){
-            steps{
-                script{
-                    sh '''
-              echo "Current directory: $(pwd)"
-              echo "Listing stock-service target:"
-              ls -la stock-service/target/ | grep -i jar || echo "No JAR files found"
-              echo "Listing gateway-service target:"
-              ls -la gateway-service/target/ | grep -i jar || echo "No JAR files found"
-              echo "Listing discovery-service target:"
-              ls -la discovery-service/target/ | grep -i jar || echo "No JAR files found"
-            '''
-                    withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
-                        sh """
-                        echo "Uploading stock-service with version: ${APP_VERSION}"
-                        curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file stock-service/target/stock-service-${APP_VERSION}.jar \
-                        http://localhost:5050/repository/stockApp-releases/org/sid/stock-service/${APP_VERSION}/stock-service-${APP_VERSION}.jar
+        // stage('deploy to nexus'){
+        //     steps{
+        //         script{
+        //             withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
+        //                 sh """
+        //                 echo "Uploading stock-service with version: ${APP_VERSION}"
+        //                 curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file stock-service/target/stock-service-${APP_VERSION}.jar \
+        //                 http://localhost:5050/repository/stockApp-releases/org/sid/stock-service/${APP_VERSION}/stock-service-${APP_VERSION}.jar
                         
-                        echo "Uploading gateway-service"
-                        curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file gateway-service/target/gateway-service-${APP_VERSION}.jar \
-                        http://localhost:5050/repository/stockApp-releases/org/sid/gateway-service/${APP_VERSION}/gateway-service-${APP_VERSION}.jar
+        //                 echo "Uploading gateway-service"
+        //                 curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file gateway-service/target/gateway-service-${APP_VERSION}.jar \
+        //                 http://localhost:5050/repository/stockApp-releases/org/sid/gateway-service/${APP_VERSION}/gateway-service-${APP_VERSION}.jar
                         
-                        echo "Uploading discovery-service"
-                        curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file discovery-service/target/discovery-service-${APP_VERSION}.jar \
-                        http://localhost:5050/repository/stockApp-releases/org/sid/discovery-service/${APP_VERSION}/discovery-service-${APP_VERSION}.jar
+        //                 echo "Uploading discovery-service"
+        //                 curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file discovery-service/target/discovery-service-${APP_VERSION}.jar \
+        //                 http://localhost:5050/repository/stockApp-releases/org/sid/discovery-service/${APP_VERSION}/discovery-service-${APP_VERSION}.jar
                         
-                        echo "Uploading frontend"
-                        curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file frontend-${APP_VERSION}.tar.gz \
-                        http://localhost:5050/repository/stockApp-releases/org/sid/frontend/${APP_VERSION}/frontend-${APP_VERSION}.tar.gz
-                        """
-                    }
-                }
-            }
-        }
+        //                 echo "Uploading frontend"
+        //                 curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file frontend-${APP_VERSION}.tar.gz \
+        //                 http://localhost:5050/repository/stockApp-releases/org/sid/frontend/${APP_VERSION}/frontend-${APP_VERSION}.tar.gz
+        //                 """
+        //             }
+        //         }
+        //     }
+        // }
         // stage('deploy'){
         //     steps{
         //         withCredentials([file(credentialsId: 'ansible_vault_password', variable: 'VAULT_PASS_FILE')]){
