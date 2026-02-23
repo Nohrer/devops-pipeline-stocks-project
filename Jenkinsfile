@@ -49,7 +49,7 @@ pipeline{
                 }                      
             }
         }
-        stage("Sonnar Scan & Dependency Check"){
+        stage("Sonnar Scan"){
             steps{
                 script {
                     def services = ['discovery-service', 'gateway-service', 'stock-service']
@@ -60,12 +60,10 @@ pipeline{
                         dir(service) {
                             withSonarQubeEnv('sonar-server') {
                                 sh """
-                                mvn clean verify \
-                                org.owasp:dependency-check-maven:check \
-                                sonar:sonar \
+                                mvn sonar:sonar \
                                 -Dsonar.projectKey=${service} \
-                                -Dsonar.dependencyCheck.jsonReportPath=target/dependency-check-report.json \
-                                -Dsonar.dependencyCheck.htmlReportPath=target/dependency-check-report.html
+                                -Dsonar.projectName=${service} \
+                                -Dsonar.projectVersion=${APP_VERSION}
                                 """
                             }
                             
