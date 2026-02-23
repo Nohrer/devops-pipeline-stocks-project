@@ -105,7 +105,7 @@ pipeline{
             steps{
                 withCredentials([file(credentialsId: 'ANSIBLE_VAULT_PASS', variable: 'VAULT_PASS_FILE')]){
                     sh 'pwd'
-                    sh 'ls ../'
+                    sh 'ls'
                     sh 'ansible-playbook -i inventory.ini deploy-apache.yml --vault-password-file=$VAULT_PASS_FILE'
                 }     
             }
@@ -113,9 +113,9 @@ pipeline{
 
     }
     post {
-        always {
-            cleanWs()
-        }
+        // always {
+        //     cleanWs()
+        // }
         failure {
             echo 'Pipeline failed. Please check SonarQube report.'
         }
