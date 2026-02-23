@@ -31,6 +31,7 @@
       loop:
         - /var/www/html/STOCK/frontend
         - /opt/STOCK/
+        - /tmp/STOCK
 
     - name: Download Front End files into Apache Directories From Nexus
       ansible.builtin.get_url:
