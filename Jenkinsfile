@@ -7,10 +7,15 @@ pipeline{
             }
         }
         stage('SonarQube Analysis') {
-            def mvn = tool 'Default Maven';
-            withSonarQubeEnv() {
-            sh "${mvn}/bin/mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=stock-services -Dsonar.projectName='stock-services'"
+            steps{
+                script{
+                     def mvn = tool 'Default Maven';
+                    withSonarQubeEnv() {
+                    sh "${mvn}/bin/mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=stock-services -Dsonar.projectName='stock-services'"
+                    }
+                }
             }
+           
         }
         stage('Generate Version'){
             steps{
