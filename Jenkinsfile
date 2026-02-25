@@ -1,7 +1,8 @@
-#!/user/bin/env groovy
+#!/usr/bin/env groovy
 
 def build
 def sonar
+def version
 def services = ['discovery-service', 'gateway-service', 'stock-service']
 pipeline{
     agent localhost
@@ -12,28 +13,21 @@ pipeline{
                 script{
                     build = load "jenkins-scripts/build.groovy"
                     sonar = load "jenkins-scripts/sonar.groovy"
+                    version = load "jenkins-scripts/version.groovy"
+
+
+                    version.setProjectName("STOCKS")
                 }
             }
         }
         stage('checkout'){
             steps{
                 checkout scm
-            }
-        }
-        //testing purpose
-        // tags git if tag exist pull if not push
-        stage('Generate Version'){
-            steps{
                 script{
-                    def dateVersion = sh(
-                        script: "date +%y%j",
-                        returnStdout: true
-                    ).trim()
-                    env.APP_VERSION = "STOCKS-1.0.${dateVersion}.${env.BUILD_NUMBER}"
+                    env.APP_VERSION = version.getVersion()
                 }
             }
         }
-
         
         stage('build'){
             steps{
@@ -46,22 +40,21 @@ pipeline{
                 }                      
             }
         }
-        stage("Sonnar Scan"){
+        stage("Sonar Scan"){
             steps{
                 script {
                     echo "Executing pipeline for branch $BRANCH_NAME"
                     sonar.scan(services)
-                    echo "Completed SonarQube scan for ${service}."
+                    echo "Completed SonarQube scan for ${services}."
                     }
                 }
             }
-        }
 
         stage('deploy to nexus'){
             when{
-                    expression{
-                        BRANCH_NAME == "main"
-                    }
+                expression{
+                    BRANCH_NAME == "main"
+                }
                 }
             steps{
                 script{
