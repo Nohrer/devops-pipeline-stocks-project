@@ -5,7 +5,7 @@ def sonar
 def version
 def services = ['discovery-service', 'gateway-service', 'stock-service']
 pipeline{
-    agent localhost
+    agent {label'localhost'}
 
     stages{
         stage("init"){
