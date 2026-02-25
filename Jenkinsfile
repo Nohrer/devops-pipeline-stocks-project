@@ -19,10 +19,12 @@ pipeline{
                 }
             }
         }
+
+        
         stage('build'){
             steps{
                 script{
-            
+                    echo "Executing pipeline for branch $BRANCH_NAME"
                     sh 'echo "Building  backend services"'
                         sh 'mvn versions:set -DnewVersion=${APP_VERSION} -DprocessAllModules'
                         sh 'mvn clean package -DskipTests'
@@ -46,7 +48,7 @@ pipeline{
             steps{
                 script {
                     def services = ['discovery-service', 'gateway-service', 'stock-service']
-                    
+                    echo "Executing pipeline for branch $BRANCH_NAME"
                     services.each { service ->
                         echo "Scanning ${service} with SonarQube..."
                         
@@ -69,9 +71,15 @@ pipeline{
 
         stage('deploy to nexus'){
             steps{
+                when{
+                    expression{
+                        BRANCH_NAME == "main"
+                    }
+                }
                 script{
                     withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
                         sh """
+                        echo "Executing pipeline for branch $BRANCH_NAME"
                         echo "Uploading stock-service with version: ${APP_VERSION}"
                         curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file stock-service/target/stock-service-${APP_VERSION}.jar \
                         http://localhost:5050/repository/stockApp-releases/org/sid/stock-service/${APP_VERSION}/stock-service-${APP_VERSION}.jar
