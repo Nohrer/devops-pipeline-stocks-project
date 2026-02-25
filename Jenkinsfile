@@ -20,6 +20,7 @@ pipeline{
                 checkout scm
             }
         }
+        //testing purpose
         // tags git if tag exist pull if not push
         stage('Generate Version'){
             steps{
