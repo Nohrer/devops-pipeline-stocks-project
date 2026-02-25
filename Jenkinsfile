@@ -1,7 +1,20 @@
+#!/user/bin/env groovy
+
+def build
+def sonar
+def services = ['discovery-service', 'gateway-service', 'stock-service']
 pipeline{
-    agent any
+    agent localhost
 
     stages{
+        stage("init"){
+            steps{
+                script{
+                    build = load "jenkins-scripts/build.groovy"
+                    sonar = load "jenkins-scripts/sonar.groovy"
+                }
+            }
+        }
         stage('checkout'){
             steps{
                 checkout scm
@@ -24,46 +37,20 @@ pipeline{
         stage('build'){
             steps{
                 script{
-                    echo "Executing pipeline for branch $BRANCH_NAME"
-                    sh 'echo "Building  backend services"'
-                        sh 'mvn versions:set -DnewVersion=${APP_VERSION} -DprocessAllModules'
-                        sh 'mvn clean package -DskipTests'
-                        sh '''
-                        [ -f stock-service/target/stock-service-${APP_VERSION}.jar ] || mv stock-service/target/stock-service-*.jar stock-service/target/stock-service-${APP_VERSION}.jar
-                        [ -f gateway-service/target/gateway-service-${APP_VERSION}.jar ] || mv gateway-service/target/gateway-service-*.jar gateway-service/target/gateway-service-${APP_VERSION}.jar
-                        [ -f discovery-service/target/discovery-service-${APP_VERSION}.jar ] || mv discovery-service/target/discovery-service-*.jar discovery-service/target/discovery-service-${APP_VERSION}.jar
-                        '''
+                    build.backend(services)
 
-                        dir('frontend'){
-                            sh 'echo "Building frontend"'
-                            sh 'npm install'
-                            sh 'npm run build'
-                            sh 'tar -czf frontend-${APP_VERSION}.tar.gz build/'
-                            sh ' mv frontend-${APP_VERSION}.tar.gz ../frontend-${APP_VERSION}.tar.gz'
-                        }
+                    dir('frontend'){
+                        build.frontend()
+                    }
                 }                      
             }
         }
         stage("Sonnar Scan"){
             steps{
                 script {
-                    def services = ['discovery-service', 'gateway-service', 'stock-service']
                     echo "Executing pipeline for branch $BRANCH_NAME"
-                    services.each { service ->
-                        echo "Scanning ${service} with SonarQube..."
-                        
-                        dir(service) {
-                            withSonarQubeEnv('sonar-server') {
-                                sh """
-                                mvn sonar:sonar \
-                                -Dsonar.projectKey=${service} \
-                                -Dsonar.projectName=${service} \
-                                -Dsonar.projectVersion=${APP_VERSION}
-                                """
-                            }
-                            // quality gate
-                        }
-                        echo "Completed SonarQube scan for ${service}."
+                    sonar.scan(services)
+                    echo "Completed SonarQube scan for ${service}."
                     }
                 }
             }
@@ -115,6 +102,11 @@ pipeline{
         }
     // choice environment, choice branch
         stage('deploy'){
+             when{
+                    expression{
+                        BRANCH_NAME == "main"
+                    }
+                }
             steps{
                 withCredentials([file(credentialsId: 'ANSIBLE_VAULT_PASS', variable: 'VAULT_PASS_FILE')]){
                     sh 'ansible-playbook -i inventory.ini deploy-apache.yml --vault-password-file=$VAULT_PASS_FILE'
