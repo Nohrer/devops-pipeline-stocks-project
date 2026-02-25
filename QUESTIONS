@@ -1,5 +1,8 @@
 - la maniere de faire pour utiliser sonar
     - pour le moment on utilise pluing + token user de nexus
 - les builds deja existant pour ne pas refaire chaque etape si on la deja bien fait
+    - build des services si on modifier juste un seul service
     - cache?
 - structure des artifactes sur nexus
+
+- une seule pipeline pour tous les branch ou une pipeline par branch

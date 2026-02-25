@@ -13,15 +13,15 @@
   tasks:
 
     # ENSURE APACHE IS RUNNING
-    - name: Ensure Apache is Installed
-      ansible.builtin.dnf:
-        name: httpd
-        state: present
+    # - name: Ensure Apache is Installed
+    #   ansible.builtin.dnf:
+    #     name: httpd
+    #     state: present
 
-    - name: Start Apache
-      ansible.builtin.service:
-        name: httpd
-        state: started
+    # - name: Start Apache
+    #   ansible.builtin.service:
+    #     name: httpd
+    #     state: started
 
     # APPLICATION COPY INTO DIRECTORY
     - name: Create Project Directory if don't exist
@@ -48,7 +48,7 @@
         remote_src: yes
         
 
-    - name: Copying backEnd files
+    - name: Download backEnd files From Nexus into App Directory
       ansible.builtin.get_url:
         url: "{{ nexus_url }}/{{ item }}/latest/{{ item }}-latest.jar"
         dest: "{{ app_dir }}"
@@ -118,3 +118,5 @@
         name: httpd
         state: restarted
         daemon_reload: yes
+# ansible role
+# group vars

@@ -7,7 +7,7 @@ pipeline{
                 checkout scm
             }
         }
-
+        // tags git if tag exist pull if not push
         stage('Generate Version'){
             steps{
                 script{
@@ -22,12 +22,7 @@ pipeline{
         stage('build'){
             steps{
                 script{
-                    def stockServiceChanged = sh(script: 'git diff --name-only HEAD-1 | grep -q "stock-service/"',returnStatus: true) == 0
-                    def gatewayServiceChanged = sh(script: 'git diff --name-only HEAD-1 | grep -q "gateway-service/"',returnStatus: true) == 0
-                    def discoveryServiceChanged = sh(script: 'git diff --name-only HEAD-1 | grep -q "discovery-service/"',returnStatus: true) == 0
-                    def frontendChanged = sh(script: 'git diff --name-only HEAD-1 | grep -q "frontend/"',returnStatus: true) == 0
-
-
+            
                     sh 'echo "Building  backend services"'
                         sh 'mvn versions:set -DnewVersion=${APP_VERSION} -DprocessAllModules'
                         sh 'mvn clean package -DskipTests'
@@ -37,7 +32,6 @@ pipeline{
                         [ -f discovery-service/target/discovery-service-${APP_VERSION}.jar ] || mv discovery-service/target/discovery-service-*.jar discovery-service/target/discovery-service-${APP_VERSION}.jar
                         '''
 
-                    // if(frontendChanged){
                         dir('frontend'){
                             sh 'echo "Building frontend"'
                             sh 'npm install'
@@ -45,7 +39,6 @@ pipeline{
                             sh 'tar -czf frontend-${APP_VERSION}.tar.gz build/'
                             sh ' mv frontend-${APP_VERSION}.tar.gz ../frontend-${APP_VERSION}.tar.gz'
                         }
-                    // }
                 }                      
             }
         }
@@ -66,8 +59,7 @@ pipeline{
                                 -Dsonar.projectVersion=${APP_VERSION}
                                 """
                             }
-                            
-                            // Publish to Jenkins dashboard
+                            // quality gate
                         }
                         echo "Completed SonarQube scan for ${service}."
                     }
@@ -113,7 +105,7 @@ pipeline{
                 }
             }
         }
-
+    // choice environment, choice branch
         stage('deploy'){
             steps{
                 withCredentials([file(credentialsId: 'ANSIBLE_VAULT_PASS', variable: 'VAULT_PASS_FILE')]){
