@@ -70,12 +70,12 @@ pipeline{
         }
 
         stage('deploy to nexus'){
-            steps{
-                when{
+            when{
                     expression{
                         BRANCH_NAME == "main"
                     }
                 }
+            steps{
                 script{
                     withCredentials([usernamePassword(credentialsId: 'nexus-credentials', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
                         sh """
