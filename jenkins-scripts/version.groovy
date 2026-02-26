@@ -26,7 +26,7 @@ def getVersion(){
                     ).trim()
 
     def latestTag = sh(
-        script: "git describe --tags --abbrev=0 2>/dev/null || echo '${projectName}1.0.${dateVersion}'"
+        script: "git describe --tags --abbrev=0 2>/dev/null || echo '${projectName}1.0.${dateVersion}'",
         returnStdout: true
     ).trim()
 
