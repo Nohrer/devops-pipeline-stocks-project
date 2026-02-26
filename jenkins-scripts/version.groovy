@@ -15,7 +15,7 @@ def getVersion(){
 
     if (currentTag){
         echo "Tag Found ${currentTag}"
-        return "${currentTag}.${buildNumber}"
+        return "${currentTag}"
     }    
 
     echo "No tag Found, Generating new one"
@@ -26,21 +26,21 @@ def getVersion(){
                     ).trim()
 
     def latestTag = sh(
-        script: "git describe --tags --abbrev=0 2>/dev/null || echo '${projectName}1.0.${dateVersion}'",
+        script: "git describe --tags --abbrev=0 2>/dev/null || echo '${projectName}.1.0.${dateVersion}.${buildNumber}'",
         returnStdout: true
     ).trim()
 
     echo "Latest tag: ${latestTag}"
 
-    def parts = latestTag.tokenize('-.')
+    def parts = latestTag.tokenize('.')
 
     def newTag
-    if(parts>size() >= 3){
+    if( parts.size() >= 3){
         def major = parts[1]
         def minor = parts[2]
         def patch = dateVersion
 
-        newTag = "${projectName}.${major}.${minor}.${patch}"
+        newTag = "${projectName}.${major}.${minor}.${patch}.${buildNumber}"
     }
     
 
@@ -48,7 +48,7 @@ def getVersion(){
 
     pushTagtoGit(newTag)
 
-    return "${newTag}.${buildNumber}"
+    return "${newTag}"
 
 }
 
