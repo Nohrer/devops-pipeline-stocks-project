@@ -13,12 +13,10 @@ def backend(List<String> services){
 }
 
 def frontend(){
-    dir(basePath){
     sh 'echo "Building frontend"'
     sh 'npm ci'
     sh 'npm run build'
     sh 'tar -czf frontend-${APP_VERSION}.tar.gz build/'
     sh 'mv frontend-${APP_VERSION}.tar.gz ../frontend-${APP_VERSION}.tar.gz'
-    }
 }
 return this
