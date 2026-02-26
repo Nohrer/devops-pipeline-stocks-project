@@ -35,7 +35,7 @@ def getVersion(){
     def parts = latestTag.tokenize('-.')
 
     def newTag
-    if(parts>size() >= 3){
+    if( parts.size() >= 3){
         def major = parts[1]
         def minor = parts[2]
         def patch = dateVersion
