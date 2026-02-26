@@ -1,6 +1,6 @@
 #!usr/bin/env groovy
 
-def Scan(List<String> services){
+def scan(List<String> services){
     services.each { service ->
         echo "Scanning ${service} with SonarQube..."
         
