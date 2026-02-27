@@ -53,9 +53,11 @@ pipeline{
             steps{
                 script{
                     timeout(time: 5, unit: 'MINUTES'){
-                        def qg = waitForQualityGate()
-                        if(qg.status != 'OK'){
-                            error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                        services.each{ service ->
+                            def qg = waitForQualityGate()
+                            if(qg.status != 'OK'){
+                                error "Pipeline aborted due to quality gate failure for ${service}: ${qg.status}"
+                            }
                         }
                     }
                 }
@@ -114,7 +116,7 @@ pipeline{
                 }
             steps{
                 withCredentials([file(credentialsId: 'ANSIBLE_VAULT_PASS', variable: 'VAULT_PASS_FILE')]){
-                    sh 'ansible-playbook -i inventory.ini deploy-apache.yml --vault-password-file=$VAULT_PASS_FILE'
+                    sh 'ansible-playbook -i ansible/inventory.ini ansible/deploy-java-application.yml --vault-password-file=$VAULT_PASS_FILE'
                 }     
             }
         }

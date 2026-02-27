@@ -1,0 +1,14 @@
+---
+- name: Deploy Java application
+  hosts: localhost
+  become: yes
+  become_user: root
+  gather_facts: false
+  vars_files:
+    - secrets.yml
+
+  roles:
+    - common
+    - apache
+    - frontend
+    - backend

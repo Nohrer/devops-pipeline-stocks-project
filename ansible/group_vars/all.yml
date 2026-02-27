@@ -1,0 +1,11 @@
+---
+app_user: appuser
+app_dir: /opt/STOCK
+frontend_dir: /var/www/html/STOCK/frontend
+tmp_dir: /tmp/STOCK
+nexus_release_url: http://localhost:5050/repository/stockApp-releases/org/sid
+
+backend_services:
+  - stock-service
+  - discovery-service
+  - gateway-service

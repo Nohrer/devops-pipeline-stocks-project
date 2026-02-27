@@ -1,0 +1,18 @@
+---
+- name: Download Front End files into Apache Directories From Nexus
+  ansible.builtin.get_url:
+    url: "{{ nexus_url }}/frontend/latest/frontend-latest.tar.gz"
+    dest: "{{ tmp_dir }}"
+    url_username: "{{ nexus_user }}"
+    url_password: "{{ nexus_password }}"
+    force_basic_auth: yes
+  register: front_end_package_status
+
+- ansible.builtin.debug: 
+    msg={{front_end_package_status.stdout_lines}}
+
+- name: Unarchive the zip
+  ansible.builtin.unarchive:
+    src: "{{ tmp_dir }}/frontend-latest.tar.gz"
+    dest: "{{ frontend_dir }}"
+    remote_src: yes
