@@ -91,7 +91,7 @@ services:
       start_period: 120s    # Nexus is slow to start
 
   bitbucket:
-    image: atlassian/bitbucket:8.19
+    image: atlassian/bitbucket:10.1.5
     container_name: bitbucket
     volumes:
       - bitbucketVolume:/var/atlassian/application-data/bitbucket
