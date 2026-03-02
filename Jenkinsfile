@@ -8,6 +8,11 @@ pipeline{
     agent {label'localhost'}
 
     stages{
+        stage("prepare WorkSpace"){
+            steps{
+                cleanWs()
+            }
+        }
         stage("init"){
             steps{
                 script{
@@ -123,9 +128,6 @@ pipeline{
 
     }
     post {
-        always {
-            cleanWs()
-        }
         failure {
             echo 'Pipeline failed. Please check SonarQube report.'
         }

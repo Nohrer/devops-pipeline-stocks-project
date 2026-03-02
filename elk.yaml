@@ -1,0 +1,166 @@
+version: '3.8'
+
+networks:
+  devops-net:
+    driver: bridge
+
+volumes:
+  elasticsearch-data:
+  sonarqube-data:
+  sonarqube-extensions:
+  sonarqube-logs:
+  sonarqube-db:
+  nexus-data:
+  bitbucketVolume:
+    external: true
+
+
+services:
+
+  # ──────────────────────────────────────────
+  #  DATABASES (backing services)
+  # ──────────────────────────────────────────
+
+  sonar-db:
+    image: postgres:15
+    container_name: sonar-db
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+      POSTGRES_DB: sonarqube
+    volumes:
+      - sonarqube-db:/var/lib/postgresql/data
+    networks:
+      - devops-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonar"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+
+
+  # ──────────────────────────────────────────
+  #  DEVOPS TOOLS
+  # ──────────────────────────────────────────
+
+  sonarqube:
+    image: sonarqube:10.4-community
+    container_name: sonarqube
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonar-db:5432/sonarqube
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-extensions:/opt/sonarqube/extensions
+      - sonarqube-logs:/opt/sonarqube/logs
+    ports:
+      - "9000:9000"
+    networks:
+      - devops-net
+    depends_on:
+      sonar-db:
+        condition: service_healthy
+    # Required kernel param — run once on Fedora host:
+    # sudo sysctl -w vm.max_map_count=524288
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+
+  nexus:
+    image: sonatype/nexus3:latest
+    container_name: nexus
+    volumes:
+      - nexus-data:/nexus-data
+    ports:
+      - "8081:8081"       # Nexus UI + Maven repo
+      - "8082:8082"       # Docker hosted repo (optional)
+    networks:
+      - devops-net
+    environment:
+      INSTALL4J_ADD_VM_PARAMS: >-
+        -Xms256m -Xmx512m
+        -XX:MaxDirectMemorySize=512m
+        -Djava.util.prefs.userRoot=/nexus-data/javaprefs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/service/rest/v1/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s    # Nexus is slow to start
+
+  bitbucket:
+    image: atlassian/bitbucket:8.19
+    container_name: bitbucket
+    volumes:
+      - bitbucketVolume:/var/atlassian/application-data/bitbucket
+    ports:
+      - "7990:7990"
+      - "7999:7999"
+    networks:
+      - devops-net
+
+  # ──────────────────────────────────────────
+  #  ELK STACK
+  # ──────────────────────────────────────────
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      - devops-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.12.0
+    container_name: logstash
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+    ports:
+      - "5044:5044"     # Beats input
+      - "5000:5000"     # TCP input (Jenkins + Ansible)
+      - "9600:9600"     # Logstash monitoring API
+    networks:
+      - devops-net
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.0
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    networks:
+      - devops-net
+    depends_on:
+      - elasticsearch
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.12.0
+    container_name: filebeat
+    user: root
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro,z
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro,z
+      - /var/run/docker.sock:/var/run/docker.sock:ro,z
+    networks:
+      - devops-net
+    depends_on:
+      - logstash
