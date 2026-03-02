@@ -8,11 +8,7 @@ pipeline{
     agent {label'localhost'}
 
     stages{
-        stage("prepare WorkSpace"){
-            steps{
-                cleanWs()
-            }
-        }
+
         stage("init"){
             steps{
                 script{
