@@ -118,7 +118,7 @@ pipeline{
                 }     
             }
         }
-
+    }
     post {
         failure {
             echo 'Pipeline failed. Please check SonarQube report.'
@@ -128,6 +128,5 @@ pipeline{
                 }
             }
         }
-    }
     }
 }
