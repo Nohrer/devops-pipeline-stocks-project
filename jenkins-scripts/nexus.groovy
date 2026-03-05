@@ -6,14 +6,14 @@ def frontend_service = "frontend"
 
 // CRED VAR
 
-def nexus_credential = nexus-stocks-cred
+def nexus_credential = "nexus-stocks-cred"
 
 //FUNCTIONS
 
 def upload_folder = (env.BRANCH_NAME == "main") ? release_folder : snapshots_folder
 
 def uploadBackend(List<String> services){
-    withCredentials([usernamePassword(credentialsId: nexus_credential, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
+    withCredentials([usernamePassword(credentialsId: this.nexus_credential, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
         services.each{service -> 
             echo "Uploading ${service} with version: ${APP_VERSION}"
             try{
@@ -32,7 +32,7 @@ def uploadBackend(List<String> services){
 }
 
 def uploadFrontEnd(){
-    withCredentials([usernamePassword(credentialsId: nexus_credential, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
+    withCredentials([usernamePassword(credentialsId: this.nexus_credential, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
     echo "Uploading ${frontend_service} with version: ${APP_VERSION}"
     try{
         sh """
