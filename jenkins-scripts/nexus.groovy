@@ -19,7 +19,7 @@ def uploadBackend(List<String> services){
             try{
             sh """
                 curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file ${service}/target/${service}-${APP_VERSION}.jar \
-                ${nexus_url}${upload_folder}${service}/${service}-${APP_VERSION}.jar
+                ${this.nexus_url}${this.upload_folder}${service}/${service}-${APP_VERSION}.jar
 
             """
             }
@@ -37,7 +37,7 @@ def uploadFrontEnd(){
     try{
         sh """
             curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file ${frontend_service}-${APP_VERSION}.tar.gz \
-            ${nexus_url}${upload_folder}${frontend_service}/${frontend_service}-${APP_VERSION}.tar.gz
+            ${this.nexus_url}${this.upload_folder}${frontend_service}/${frontend_service}-${APP_VERSION}.tar.gz
         """
     }
     catch(e){
