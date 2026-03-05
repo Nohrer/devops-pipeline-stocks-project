@@ -40,10 +40,11 @@ def uploadFrontEnd(){
             ${nexus_url}${upload_folder}${frontend_service}/${frontend_service}-${APP_VERSION}.tar.gz
         """
     }
-    }catch(e){
+    catch(e){
         echo "Failed to upload ${frontend_service} to Nexus. Error: ${e.getMessage()}"
         throw e
     }
+}
 }
 
 return this
