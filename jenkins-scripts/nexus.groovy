@@ -11,7 +11,7 @@ import groovy.transform.Field
 
 //FUNCTIONS
 
-def upload_folder(){
+def get_upload_folder(){
     (env.BRANCH_NAME == "main") ? release_folder : snapshots_folder
 }
 def uploadBackend(List<String> services){
@@ -21,7 +21,7 @@ def uploadBackend(List<String> services){
             try{
             sh """
                 curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file ${service}/target/${service}-${APP_VERSION}.jar \
-                ${nexus_url}${upload_folder}${service}/${service}-${APP_VERSION}.jar
+                ${nexus_url}${get_upload_folder()}${service}/${service}-${APP_VERSION}.jar
 
             """
             }
@@ -39,7 +39,7 @@ def uploadFrontEnd(){
     try{
         sh """
             curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file ${frontend_service}-${APP_VERSION}.tar.gz \
-            ${nexus_url}${upload_folder}${frontend_service}/${frontend_service}-${APP_VERSION}.tar.gz
+            ${nexus_url}${get_upload_folder()}${frontend_service}/${frontend_service}-${APP_VERSION}.tar.gz
         """
     }
     catch(e){
