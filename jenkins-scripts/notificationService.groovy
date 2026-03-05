@@ -53,7 +53,7 @@ def messageToAdmin(String stageName, String errorMessage){
     </html>
     """
 }
-// cette fonction envoi des emails
+// cette fonction envoi des emails il faut configurer le serveur via jenkins system apres install plugin
 def sendNotification(String reciever,String subject,String body){
     emailext{
         to: reciever,
@@ -77,3 +77,5 @@ def notifyAdmin(String stageName, String errorMessage){
     def body = messageToAdmin(stageName, errorMessage)
     sendNotification(ADMIN_EMAIL, subject, body)
 }
+
+return this
