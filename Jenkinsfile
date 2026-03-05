@@ -80,22 +80,6 @@ pipeline{
                 }
             }
 
-<<<<<<< HEAD
-        stage("Quality Gate"){
-            steps{
-                script{
-                    timeout(time: 5, unit: 'MINUTES'){
-                        def qg = waitForQualityGate()
-                        if(qg.status != 'OK'){
-                            notify.notifyDev("Quality Gate")
-                            error "Quality gate failed: ${qg.status}"
-                        }
-                        }
-                    }
-                }
-            }
-        }
-=======
         // We should configure weebhooks in sonarqube to trigger this stage to send status
         // stage("Quality Gate"){
         //     steps{
@@ -111,7 +95,6 @@ pipeline{
         //         }
         //     }
         
->>>>>>> dev
         stage('Upload to nexus'){
             steps{
                 script{
