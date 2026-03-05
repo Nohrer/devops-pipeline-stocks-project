@@ -6,7 +6,6 @@ target/
 
 *.tar.gz
 filebeat/
-logstash/
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
