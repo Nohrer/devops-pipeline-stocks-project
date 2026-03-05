@@ -1,6 +1,6 @@
 // Ce service notify l'utilisateurs dev ou admin en cas d'erreur via gmail
 
-def ADMIN_EMAIL = "jenkins-service@sii-maroc.com"
+def ADMIN_EMAIL = "naoufel.guendouz@sii-maroc.com"
 
 def getDevEmail(){
     try{
