@@ -5,7 +5,7 @@ def ADMIN_EMAIL = "jenkins-service@sii-maroc.com"
 def getDevEmail(){
     try{
         def gitEmail = sh(
-            script: "git log -1 --format='%ae'"
+            script: "git log -1 --format='%ae'",
             returnStdout: true
         ).trim()
         
@@ -55,12 +55,12 @@ def messageToAdmin(String stageName, String errorMessage){
 }
 // cette fonction envoi des emails il faut configurer le serveur via jenkins system apres install plugin
 def sendNotification(String reciever,String subject,String body){
-    emailext{
+    emailext(
         to: reciever,
         subject: subject,
         body: body,
         mimeType: 'text/html'
-    }
+    )
     echo "Notification sent to: ${reciever}"
 }
 

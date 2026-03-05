@@ -80,6 +80,7 @@ pipeline{
                 }
             }
 
+<<<<<<< HEAD
         stage("Quality Gate"){
             steps{
                 script{
@@ -94,10 +95,26 @@ pipeline{
                 }
             }
         }
+=======
+        // We should configure weebhooks in sonarqube to trigger this stage to send status
+        // stage("Quality Gate"){
+        //     steps{
+        //         script{
+        //             timeout(time: 5, unit: 'MINUTES'){
+        //                 def qg = waitForQualityGate()
+        //                 if(qg.status != 'OK'){
+        //                     notify.notifyDev("Quality Gate")
+        //                     error "Quality gate failed: ${qg.status}"
+        //                 }
+        //                 }
+        //             }
+        //         }
+        //     }
+        
+>>>>>>> dev
         stage('Upload to nexus'){
             steps{
                 script{
-                    
                     nexus.uploadBackend(services)
                     nexus.uploadFrontEnd()
                 }
@@ -113,7 +130,7 @@ pipeline{
                 }
             steps{
                 withCredentials([file(credentialsId: 'ANSIBLE_VAULT_PASS', variable: 'VAULT_PASS_FILE')]){
-                    sh 'ansible-playbook -i ansible/inventory.ini ansible/deploy-java-application.yml --vault-password-file=$VAULT_PASS_FILE'
+                    sh "ansible-playbook -i ansible/inventory.ini ansible/deploy-java-application.yml --vault-password-file=$VAULT_PASS_FILE -e APP_VERSION=${APP_VERSION}"
                 }     
             }
         }

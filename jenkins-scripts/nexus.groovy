@@ -1,17 +1,19 @@
 // URL STRUCTURE VARS
-def nexus_url = "http://localhost:5050/repository/"
-def release_folder = "stockApp-releases/org/sid/"
-def snapshots_folder ="stockApp-snapshots/org/sid/"
-def frontend_service = "frontend"
+import groovy.transform.Field
+@Field String nexus_url = "http://localhost:8081/repository/"
+@Field String release_folder = "stockApp-release/"
+@Field String snapshots_folder ="stockApp-snapshots/"
+@Field String frontend_service = "frontend"
 
 // CRED VAR
 
-def nexus_credential = "nexus-credentials"
+@Field String nexus_credential = "nexus-stocks-cred"
 
 //FUNCTIONS
 
-def upload_folder = (env.BRANCH_NAME == "main") ? release_folder : snapshots_folder
-
+def get_upload_folder(){
+    (env.BRANCH_NAME == "main") ? release_folder : snapshots_folder
+}
 def uploadBackend(List<String> services){
     withCredentials([usernamePassword(credentialsId: nexus_credential, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
         services.each{service -> 
@@ -19,10 +21,11 @@ def uploadBackend(List<String> services){
             try{
             sh """
                 curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file ${service}/target/${service}-${APP_VERSION}.jar \
-                ${nexus_url}${upload_folder}${service}/${APP_VERSION}/${service}-${APP_VERSION}.jar
+                ${nexus_url}${get_upload_folder()}${service}/${service}-${APP_VERSION}.jar
 
             """
-            }catch(e){
+            }
+            catch(e){
                 echo "Failed to upload ${service} to Nexus. Error: ${e.getMessage()}"
                 throw e
             }
@@ -31,18 +34,19 @@ def uploadBackend(List<String> services){
 }
 
 def uploadFrontEnd(){
-    withCredentials([usernamePassword(credentialsId: ${nexus_credential}, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
+    withCredentials([usernamePassword(credentialsId: nexus_credential, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
     echo "Uploading ${frontend_service} with version: ${APP_VERSION}"
     try{
         sh """
             curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file ${frontend_service}-${APP_VERSION}.tar.gz \
-            ${nexus_url}${upload_folder}${frontend_service}/${APP_VERSION}/${frontend_service}-${APP_VERSION}.tar.gz
+            ${nexus_url}${get_upload_folder()}${frontend_service}/${frontend_service}-${APP_VERSION}.tar.gz
         """
     }
-    }catch(e){
+    catch(e){
         echo "Failed to upload ${frontend_service} to Nexus. Error: ${e.getMessage()}"
         throw e
     }
+}
 }
 
 return this

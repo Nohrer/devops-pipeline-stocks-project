@@ -1,7 +1,7 @@
 ---
 - name: Download backEnd files From Nexus into App Directory
   ansible.builtin.get_url:
-    url: "{{ nexus_url }}/{{ item }}/latest/{{ item }}-latest.jar"
+    url: "{{ nexus_url }}/{{ item }}/{{ item }}-{{ APP_VERSION }}.jar"
     dest: "{{ app_dir }}"
     url_username: "{{ nexus_user }}"
     url_password: "{{ nexus_password }}"
@@ -27,7 +27,7 @@
 - name: Create SystemD Services
   ansible.builtin.template:
     src: java-service.service.j2
-    dest: "/etc/systemd/system/{{ item.path | basename | regex_replace('-latest.jar','')}}.service"
+    dest: "/etc/systemd/system/{{ item.path | basename | regex_replace('-' + APP_VERSION + '.jar','')}}.service"
     mode: '0644'
   loop: "{{ jar_files.files }}"
   notify: Reload System
