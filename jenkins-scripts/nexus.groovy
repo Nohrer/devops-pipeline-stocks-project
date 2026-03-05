@@ -32,7 +32,7 @@ def uploadBackend(List<String> services){
 }
 
 def uploadFrontEnd(){
-    withCredentials([usernamePassword(credentialsId: ${nexus_credential}, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
+    withCredentials([usernamePassword(credentialsId: nexus_credential, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
     echo "Uploading ${frontend_service} with version: ${APP_VERSION}"
     try{
         sh """

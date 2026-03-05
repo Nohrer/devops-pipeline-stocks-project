@@ -98,7 +98,6 @@ pipeline{
         stage('Upload to nexus'){
             steps{
                 script{
-                    
                     nexus.uploadBackend(services)
                     nexus.uploadFrontEnd()
                 }
