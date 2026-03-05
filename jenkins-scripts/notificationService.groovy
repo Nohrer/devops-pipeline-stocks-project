@@ -5,7 +5,7 @@ def ADMIN_EMAIL = "jenkins-service@sii-maroc.com"
 def getDevEmail(){
     try{
         def gitEmail = sh(
-            script: "git log -1 --format='%ae'"
+            script: "git log -1 --format='%ae'",
             returnStdout: true
         ).trim()
         
