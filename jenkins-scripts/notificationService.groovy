@@ -1,6 +1,6 @@
 // Ce service notify l'utilisateurs dev ou admin en cas d'erreur via gmail
-
-def ADMIN_EMAIL = "noussi-nano@hotmail.fr"
+import groovy.transform.Field
+@Field String ADMIN_EMAIL = "noussi-nano@hotmail.fr"
 
 def getDevEmail(){
     try{

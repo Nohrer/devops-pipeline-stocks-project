@@ -23,7 +23,7 @@ pipeline{
                     nexus = load "jenkins-scripts/nexus.groovy"
 
                     version.setProjectName("STOCKS")
-                    notify.messageToAdmin("Pipeline", "Pipeline initialization complete")
+                    notify.notifyAdmin("Pipeline", "Pipeline initialization complete")
                 }
             }
         }

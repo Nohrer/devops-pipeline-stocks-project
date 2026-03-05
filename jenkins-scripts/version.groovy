@@ -1,8 +1,9 @@
 #!/usr/bin/env groovy
+import groovy.transform.Field
 
-def projectName
+@Field String projectName = "APP"
 
-def setProjectName(String pn = ""){
+def setProjectName(String pn){
     projectName = pn
 }
 def getVersion(){
