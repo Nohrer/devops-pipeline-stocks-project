@@ -1,4 +1,5 @@
 // URL STRUCTURE VARS
+import groovy.transform.Field
 @Field String nexus_url = "http://localhost:8081/repository/"
 @Field String release_folder = "stockApp-release/"
 @Field String snapshots_folder ="stockApp-snapshots/"
