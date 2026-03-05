@@ -1,25 +1,26 @@
 // URL STRUCTURE VARS
-def nexus_url = "http://localhost:8081/repository/"
-def release_folder = "stockApp-release/"
-def snapshots_folder ="stockApp-snapshots/"
-def frontend_service = "frontend"
+@Field String nexus_url = "http://localhost:8081/repository/"
+@Field String release_folder = "stockApp-release/"
+@Field String snapshots_folder ="stockApp-snapshots/"
+@Field String frontend_service = "frontend"
 
 // CRED VAR
 
-def nexus_credential = "nexus-stocks-cred"
+@Field String nexus_credential = "nexus-stocks-cred"
 
 //FUNCTIONS
 
-def upload_folder = (env.BRANCH_NAME == "main") ? release_folder : snapshots_folder
-
+def upload_folder(){
+    (env.BRANCH_NAME == "main") ? release_folder : snapshots_folder
+}
 def uploadBackend(List<String> services){
-    withCredentials([usernamePassword(credentialsId: "nexus-stocks-cred", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
+    withCredentials([usernamePassword(credentialsId: nexus_credential, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
         services.each{service -> 
             echo "Uploading ${service} with version: ${APP_VERSION}"
             try{
             sh """
                 curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file ${service}/target/${service}-${APP_VERSION}.jar \
-                ${this.nexus_url}${this.upload_folder}${service}/${service}-${APP_VERSION}.jar
+                ${nexus_url}${upload_folder}${service}/${service}-${APP_VERSION}.jar
 
             """
             }
@@ -32,12 +33,12 @@ def uploadBackend(List<String> services){
 }
 
 def uploadFrontEnd(){
-    withCredentials([usernamePassword(credentialsId: "nexus-stocks-cred", usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
+    withCredentials([usernamePassword(credentialsId: nexus_credential, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]){
     echo "Uploading ${frontend_service} with version: ${APP_VERSION}"
     try{
         sh """
             curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file ${frontend_service}-${APP_VERSION}.tar.gz \
-            ${this.nexus_url}${this.upload_folder}${frontend_service}/${frontend_service}-${APP_VERSION}.tar.gz
+            ${nexus_url}${upload_folder}${frontend_service}/${frontend_service}-${APP_VERSION}.tar.gz
         """
     }
     catch(e){
