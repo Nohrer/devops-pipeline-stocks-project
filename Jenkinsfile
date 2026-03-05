@@ -113,7 +113,7 @@ pipeline{
                 }
             steps{
                 withCredentials([file(credentialsId: 'ANSIBLE_VAULT_PASS', variable: 'VAULT_PASS_FILE')]){
-                    sh 'ansible-playbook -i ansible/inventory.ini ansible/deploy-java-application.yml --vault-password-file=$VAULT_PASS_FILE'
+                    sh "ansible-playbook -i ansible/inventory.ini ansible/deploy-java-application.yml --vault-password-file=$VAULT_PASS_FILE -e APP_VERSION=${APP_VERSION}"
                 }     
             }
         }

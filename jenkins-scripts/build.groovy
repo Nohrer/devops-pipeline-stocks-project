@@ -13,17 +13,16 @@ def backend(List<String> services){
 }
 
 def verifyJars(List<String> services){
-    services.each(service ->
+    services.each{service ->
         def jarFile = "${service}/target/${service}-${APP_VERSION}.jar"
         if(fileExists(jarFile)){
 
             echo "verifying ${jarFile}"
             
             sh "test -s ${jarFile} && echo 'File exists and is not empty'"
-            sh "jar tf ${jarFile} > /dev/null && echo 'Jar structure is valid"
-
+            sh "jar tf ${jarFile} > /dev/null && echo 'Jar structure is valid'"
         }
-    )
+    }
 }
 
 def frontend(){

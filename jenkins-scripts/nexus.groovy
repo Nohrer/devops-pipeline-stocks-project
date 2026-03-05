@@ -1,12 +1,12 @@
 // URL STRUCTURE VARS
-def nexus_url = "http://localhost:5050/repository/"
-def release_folder = "stockApp-releases/org/sid/"
-def snapshots_folder ="stockApp-snapshots/org/sid/"
+def nexus_url = "http://localhost:8081/repository/"
+def release_folder = "stockApp-release/"
+def snapshots_folder ="stockApp-snapshots/"
 def frontend_service = "frontend"
 
 // CRED VAR
 
-def nexus_credential = "nexus-credentials"
+def nexus_credential = "nexus-stocks-cred"
 
 //FUNCTIONS
 
@@ -19,7 +19,7 @@ def uploadBackend(List<String> services){
             try{
             sh """
                 curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file ${service}/target/${service}-${APP_VERSION}.jar \
-                ${nexus_url}${upload_folder}${service}/${APP_VERSION}/${service}-${APP_VERSION}.jar
+                ${nexus_url}${upload_folder}${service}/${service}-${APP_VERSION}.jar
 
             """
             }catch(e){
@@ -36,7 +36,7 @@ def uploadFrontEnd(){
     try{
         sh """
             curl -v -u \$NEXUS_USER:\$NEXUS_PASSWORD --upload-file ${frontend_service}-${APP_VERSION}.tar.gz \
-            ${nexus_url}${upload_folder}${frontend_service}/${APP_VERSION}/${frontend_service}-${APP_VERSION}.tar.gz
+            ${nexus_url}${upload_folder}${frontend_service}/${frontend_service}-${APP_VERSION}.tar.gz
         """
     }
     }catch(e){
