@@ -1,0 +1,17 @@
+---
+- name: Ensure Apache is Installed
+  ansible.builtin.dnf:
+    name: httpd
+    state: present
+
+- name: Ensure Apache Configuration Exist
+  ansible.builtin.copy:
+    src: stockFront.conf
+    dest: "/etc/httpd/conf.d"
+  notify: restart apache2
+
+- name: Start Apache and Enable it on Boot
+  ansible.builtin.service:
+    name: httpd
+    state: started
+    enabled: yes

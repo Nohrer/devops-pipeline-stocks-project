@@ -1,0 +1,17 @@
+---
+- name: Create Project Directory if don't exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ app_dir }}"
+    - "{{ frontend_dir }}"
+    - "{{ tmp_dir }}"
+
+- name: Create App User If doesn't exist
+  ansible.builtin.user:
+    name: "{{ app_user }}"
+    shell: /sbin/nologin
+    create_home: no
+    state: present
+

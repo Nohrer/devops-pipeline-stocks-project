@@ -1,0 +1,40 @@
+---
+- name: Download backEnd files From Nexus into App Directory
+  ansible.builtin.get_url:
+    url: "{{ nexus_url }}/{{ item }}/latest/{{ item }}-latest.jar"
+    dest: "{{ app_dir }}"
+    url_username: "{{ nexus_user }}"
+    url_password: "{{ nexus_password }}"
+    force_basic_auth: yes
+  loop:
+    - stock-service
+    - discovery-service
+    - gateway-service
+
+- name: Ensure Application Ownership
+  ansible.builtin.file:
+    path: "{{ app_dir }}"
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    recurse: yes
+
+- name: Find Jars
+  ansible.builtin.find:
+    paths: "{{ app_dir }}"
+    patterns: "*.jar"
+  register: jar_files
+
+- name: Create SystemD Services
+  ansible.builtin.template:
+    src: java-service.service.j2
+    dest: "/etc/systemd/system/{{ item.path | basename | regex_replace('-latest.jar','')}}.service"
+    mode: '0644'
+  loop: "{{ jar_files.files }}"
+  notify: Reload System
+
+- name: Ensure Backend Services running
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: started
+    daemon_reload: yes
+  loop: "{{ backend_services }}"
